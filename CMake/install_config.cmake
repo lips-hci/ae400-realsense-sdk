@@ -16,7 +16,6 @@ configure_package_config_file(CMake/realsense2Config.cmake.in realsense2Config.c
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
 configure_file(config/librealsense.pc.in config/realsense2.pc @ONLY)
-configure_file(config/network.json config/network.json @ONLY)
 
 install(TARGETS ${LRS_TARGET}
     EXPORT realsense2Targets
@@ -46,26 +45,9 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/realsense2ConfigVersion.cmake"
 
 install(CODE "execute_process(COMMAND ldconfig)")
 
-if(UNIX)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config/network.json"
-        DESTINATION /usr/etc/LIPS/lib
-)
-endif(UNIX)
-if(WIN32)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config/network.json"
-        DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-)
-add_custom_target(install_network_config
-    DEPENDS ${LRS_TARGET}
-    OUTPUT network.json
-    SOURCES ${CMAKE_SOURCE_DIR}/config/network.json
-    COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/config/network.json
-        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/network.json
-)
-endif(WIN32)
-
 # Set library pkgconfig file for facilitating 3rd party integration
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config/realsense2.pc"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
 )
+
+include(CMake/install_network_config.cmake)

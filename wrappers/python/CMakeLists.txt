@@ -34,11 +34,11 @@ install(TARGETS pyrealsense2 EXPORT realsense2Targets
 )
 
 set(RAW_RS_CPP ../../src/backend.cpp pybackend_extras.cpp pybackend.cpp
-               ../../src/types.cpp ../../src/archive.cpp ../../src/log.cpp
-               ../../third-party/easyloggingpp/src/easylogging++.cc)
-set(RAW_RS_HPP ../../src/backend.h ../../src/archive.h pybackend_extras.h
+           ../../src/linux/backend-v4l2.cpp ../../src/linux/backend-hid.cpp ../../src/types.cpp
+           ../../src/archive.cpp ../../src/log.cpp ../../src/types.cpp ../../third-party/easyloggingpp/src/easylogging++.cc)
+set(RAW_RS_HPP ../../src/backend.h ../../src/linux/backend-v4l2.h ../../src/linux/backend-hid.h
+           ../../src/archive.h pybackend_extras.h
                ../../src/types.h ../../third-party/easyloggingpp/src/easylogging++.h)
-
 
 if( (${CMAKE_SYSTEM_VERSION} EQUAL 6.1) OR (FORCE_WINUSB_UVC) ) # Windows 7
     list(APPEND RAW_RS_CPP
@@ -50,15 +50,20 @@ if( (${CMAKE_SYSTEM_VERSION} EQUAL 6.1) OR (FORCE_WINUSB_UVC) ) # Windows 7
         ../../src/win7/winusb_uvc/winusb_uvc.cpp
         )
 else() # Some other windows version
-    # Link to prebuilt backend-ethernet lib
+    list(APPEND RAW_RS_CPP
+        ../../src/win/win-helpers.cpp
+        ../../src/win/win-uvc.cpp
+        ../../src/win/win-usb.cpp
+        ../../src/win/win-hid.cpp
+        ../../src/win/win-backend.cpp
+        )
 endif()
 
 pybind11_add_module(pybackend2 SHARED ${RAW_RS_CPP} ${RAW_RS_HPP})
 if(USE_EXTERNAL_USB)
     add_dependencies(pybackend2 libusb)
-    include_directories(pybackend2 ${LIBUSB_LOCAL_INCLUDE_PATH})
 endif()
-target_link_libraries(pybackend2 PRIVATE ${LIBUSB1_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} backend-ethernet)
+target_link_libraries(pybackend2 PRIVATE ${LIBUSB1_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(pybackend2 PROPERTIES
                         VERSION     ${REALSENSE_VERSION_STRING}
                         SOVERSION   ${REALSENSE_VERSION_MAJOR})
@@ -71,3 +76,5 @@ install(TARGETS pybackend2
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
+
+include(link_lips_prebuilt.cmake)

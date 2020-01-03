@@ -19,8 +19,32 @@ else()
     string(STRIP ${TARGET_ARCH} TARGET_ARCH)
 endif(WIN32)
 
+# default we use lib backend-ethernet v0.9 now
+# RS2 API version 2.17~2.20 => lib backend-ethernet v0.9
+# RS2 API version 2.21~2.3x => lib backend-ethernet v1.0
+if(${REALSENSE_VERSION_STRING} VERSION_LESS 2.21)
+    set(LIBBE_VERSION_MAJOR 0)
+    set(LIBBE_VERSION_MINOR 9)
+    # IMPORTANT!! MUST HAVE for patch!!
+    # Explicitly link librealsense2 to LIBUSB
+    target_link_libraries(${LRS_TARGET} PRIVATE ${LIBUSB1_LIBRARIES})
+else()
+    set(LIBBE_VERSION_MAJOR 1)
+    set(LIBBE_VERSION_MINOR 0)
+
+    # after RS2 API 2.21, libusb_config is included on demand
+    include(libusb_config)
+    target_link_libraries(${LRS_TARGET} PRIVATE usb)
+endif()
+
+if(USE_EXTERNAL_USB)
+    add_dependencies(${LRS_TARGET} libusb)
+endif()
+
+set(LIBVERSION ${LIBBE_VERSION_MAJOR}.${LIBBE_VERSION_MINOR})
+
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
-    ${CMAKE_SOURCE_DIR}/third-party/lips/lib/${OS}
+    ${CMAKE_SOURCE_DIR}/third-party/lips/lib/v${LIBVERSION}/${OS}
 )
 
 # Look for the library for Release
@@ -35,7 +59,7 @@ find_library(LIB_BACKEND_ETHERNET_DEBUG
     PATH_SUFFIXES ${TARGET_ARCH} ${TARGET_ARCH}/Debug
 )
 
-if(${LIB_BACKEND_ETHERNET} STREQUAL "backend-ethernet-NOTFOUND")
+if(${LIB_BACKEND_ETHERNET} STREQUAL "LIB_BACKEND_ETHERNET-NOTFOUND")
     message(FATAL_ERROR "backend-ethernet library not found! Please check github.com/lips-hci")
 elseif(NOT TARGET backend-ethernet)
     add_library(backend-ethernet STATIC IMPORTED)

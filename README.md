@@ -1,7 +1,12 @@
 # LIPSedge™ AE400 stereo camera
-[LIPSedge™ AE400](https://www.lips-hci.com/product?product_id=29) stereo camera is powered by Intel® RealSense™ Technology and designed for industrial applications, such as robot applications, logistic/factory automation, and 3D monitoring/inspection.
+![ae400 product banner](https://www.lips-hci.com/image/data/AE400/AE400_WEB-BANNER.png)
+**LIPSedge™ AE400 stereo camera** is powered by Intel® RealSense™ Technology and designed for industrial applications, such as robot applications, logistic/factory automation, and 3D monitoring/inspection.
 
-## Overview
+ - [Product Overview](https://www.lips-hci.com/product?product_id=29)
+ - [Product Documents](https://filebox.lips-hci.com/index.php/s/ZNO5JggmYeddYcA)
+ - [Product Support](https://www.lips-hci.com/downloads/category)
+
+## SDK Overview
 This software development kits is fully compatible to [Intel® RealSense™ SDK 2.0](https://github.com/IntelRealSense/librealsense) to help you connect to LIPSedge AE400 camera easily, the RealSense SDK already offers many tools, code samples, and wrappers for integration with existing 3rd-party technologies and software languages.
 
 ## Build from source

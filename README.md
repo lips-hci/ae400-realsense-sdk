@@ -5,12 +5,12 @@
 This software development kits is fully compatible to [Intel® RealSense™ SDK 2.0](https://github.com/IntelRealSense/librealsense) to help you connect to LIPSedge AE400 camera easily, the RealSense SDK already offers many tools, code samples, and wrappers for integration with existing 3rd-party technologies and software languages.
 
 ## Build from source
-You need CMake to build this SDK, the step is almost same as RealSense project, please refer their wiki pages for more instructions.
+You need CMake to build this SDK, please refer steps described on RealSense™ SDK document.
  - [Installation on Ubuntu Linux](https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md)
  - [Installation on Windows](https://github.com/IntelRealSense/librealsense/blob/master/doc/installation_windows.md)
 
 
-The simple command to build Release SDK is
+The simple command to have Release build is
  ```
  $ mkdir build_Release
  $ cd build_Release
@@ -22,14 +22,15 @@ The simple command to build Release SDK is
 ## Build wrappers for your applications
 Intel RealSense SDK already supports many 3rd-party technologies, you can check the [build configurations](https://github.com/IntelRealSense/librealsense/wiki/Build-Configuration) to enable the wrapper you want and re-run CMake build to get binary library.
 
-### wrappers provided by Intel RealSense SDK
- - [Wrapper Overview (support list)](https://github.com/IntelRealSense/librealsense/tree/master/wrappers)
- - [OpenCV](https://github.com/IntelRealSense/librealsense/tree/master/wrappers/opencv)
- - [OpenNI2](https://github.com/IntelRealSense/librealsense/tree/master/wrappers/openni2)
- - [Python](https://github.com/IntelRealSense/librealsense/tree/master/wrappers/python)
+### wrappers provided by Intel RealSense™ SDK
+Wrapper Overview ([learn more](https://github.com/IntelRealSense/librealsense/tree/master/wrappers))
+ - OpenCV ([learn more](https://github.com/IntelRealSense/librealsense/tree/master/wrappers/opencv))
+ - OpenNI2 ([learn more](https://github.com/IntelRealSense/librealsense/tree/master/wrappers/openni2))
+ - Python 2.7 / 3.6 / 3.7 ([learn more](https://github.com/IntelRealSense/librealsense/tree/master/wrappers/python))
+ - ROS ([learn more](https://github.com/IntelRealSense/realsense-ros))
 
  ### wrappers provided by LIPS
- - [NVIDIA Isaac SDK](https://developer.nvidia.com/isaac-sdk) - Please checkout our LIPS project [stereo_ae400](https://github.com/lips-hci/stereo_ae400) on GitHub.
+ - [NVIDIA Isaac SDK](https://developer.nvidia.com/isaac-sdk) integration how-to ([learn more](https://github.com/lips-hci/stereo_ae400))
 
 The simple command to build Release SDK with OpenNI2/OpenCV/Python wrappers is
 ```
@@ -46,15 +47,18 @@ $ make -j4
 $ sudo make install
 ```
 
-## Patch your RealSense git repository
-LIPS provides a helper script to support you applying file changes on a clean RealSense git repository to get a LIPS AE400 SDK codebase.
+## Patch yourRealSense™ SDK git repository
+LIPS provides a helper script to support you applying file changes on a clean RealSense SDK git repository to get a LIPS AE400 SDK codebase.
 
-* Follow below steps to patch your local RealSense git repository, e.g. version is 2.29.0.
+**Support status of RealSense™ SDK version (last updated: 2020/01/09).** ([learn more](doc/support_list_ae400_realsense_sdk.md))
+
+* Follow below steps to patch your local RealSense SDK git repository, assume your version is 2.29.0.
 ```
 $ git clone https://github.com/IntelRealSense/librealsense.git ~/rs2
 $ cd ~/rs2
 $ git checkout -b rs2.29.0 v2.29.0
-```
+``` 
+
 Assume you have cloned [AE400 SDK](https://github.com/lips-hci/ae400-realsense-sdk), switch to it and run the script.
 You have to input path of your RealSense source directory as input argument.
 ```
@@ -63,8 +67,8 @@ ae400-realsense-sdk$ ./scripts/patch-realsense-to-lips-ae400-sdk.sh ~/rs2
 ```
 After successfully patching, you can build AE400 SDK from this source.
 
-### Installation on Linux system
-Assume you have completed CMake build on AE400 SDK and output directory is 'build_Release'
+### Installation on Ubuntu Linux
+Run CMake in the patched git repository, assume output directory is 'build_Release'
 * Edit network setting by your preferred text editor
 ```
 rs2$ cd build_Release
@@ -91,8 +95,8 @@ network setting is found at /usr/etc/LIPS/lib/network.json
 ```
 ![run rs-capture screenshot](screenshot-rs-capture.png)
 
-### Installation on Windows system
-Assume you have ran the script to patch your RealSense repository and also completed CMake configuration and generation to get Visual Studio 2015/2017 project solution(.sln) on Windows. Open librealsense2.sln, find project 'install_network_config' and edit the source 'network.json'
+### Installation on Windows
+Assume you have processed the script to patch your RealSense™ SDK repository and completed CMake configuration and generation to generate the Visual Studio 2015/2017 project solution. Open librealsense2.sln, find project 'install_network_config' and edit the source 'network.json'
 
 ![edit vs2017 project install_network_config](screenshot-vs2017-project-install_network_config.png)
 

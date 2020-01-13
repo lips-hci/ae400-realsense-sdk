@@ -7,13 +7,14 @@
  - [Product Support](https://www.lips-hci.com/downloads/category)
 
 ## SDK Overview
-This software development kits is fully compatible to [Intel® RealSense™ SDK 2.0](https://github.com/IntelRealSense/librealsense) to help you connect to LIPSedge AE400 camera easily, the RealSense SDK already offers many tools, code samples, and wrappers for integration with existing 3rd-party technologies and software languages.
+This software development kits(SDK) is fully compatible to [Intel® RealSense™ SDK 2.0](https://github.com/IntelRealSense/librealsense) to assist you connect LIPSedge AE400 Stereo Camera to your application fast and easily. RealSense™ SDK 2.0 already offers many tools, code samples, and wrappers for integration with existing 3rd-party technologies and software languages.
+
+**Minimum version requirement for RealSense™ SDK is [2.17.1](https://github.com/IntelRealSense/librealsense/releases?after=v2.17.1)** ([learn more](doc/support_list_ae400_realsense_sdk.md))
 
 ## Build from source
 You need CMake to build this SDK, please refer steps described on RealSense™ SDK document.
  - [Installation on Ubuntu Linux](https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md)
  - [Installation on Windows](https://github.com/IntelRealSense/librealsense/blob/master/doc/installation_windows.md)
-
 
 The simple command to have Release build is
  ```
@@ -52,10 +53,8 @@ $ make -j4
 $ sudo make install
 ```
 
-## Patch yourRealSense™ SDK git repository
-LIPS provides a helper script to support you applying file changes on a clean RealSense SDK git repository to get a LIPS AE400 SDK codebase.
-
-**Support status of RealSense™ SDK version (last updated: 2020/01/09).** ([learn more](doc/support_list_ae400_realsense_sdk.md))
+## Patch your RealSense™ SDK to support AE400
+LIPS provides a helper script to upgrade a clean RealSense SDK git repository automatically to support LIPSedge AE400 stereo camera.
 
 * Follow below steps to patch your local RealSense SDK git repository, assume your version is 2.29.0.
 ```
@@ -71,6 +70,9 @@ $ cd ae400-realsense-sdk
 ae400-realsense-sdk$ ./scripts/patch-realsense-to-lips-ae400-sdk.sh ~/rs2
 ```
 After successfully patching, you can build AE400 SDK from this source.
+
+For Windows users, we recommend [Git for Windows](https://gitforwindows.org/) which provides a BASH emulation used to run Git from the command line, you can run our script inside Git BASH environment.
+![run git-bash-run-patch-script](screenshot-git-windows-run-patch-script.png)
 
 ### Installation on Ubuntu Linux
 Run CMake in the patched git repository, assume output directory is 'build_Release'

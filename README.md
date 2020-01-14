@@ -1,13 +1,14 @@
-# LIPSedge™ AE400 stereo camera
+# LIPSedge™ AE400 Industrial 3D Camera
 ![ae400 product banner](https://www.lips-hci.com/image/data/AE400/AE400_WEB-BANNER.png)
-**LIPSedge™ AE400 stereo camera** is powered by Intel® RealSense™ Technology and designed for industrial applications, such as robot applications, logistic/factory automation, and 3D monitoring/inspection.
+**LIPSedge™ AE400** is an industrial GigE 3D camera with IP67 protection and powered by Intel® RealSense™ technology and designed for industrial applications, such as robot application, logistic/factory automation, and 3D monitoring/inspection.
 
  - [Product Overview](https://www.lips-hci.com/product?product_id=29)
  - [Product Documents](https://filebox.lips-hci.com/index.php/s/ZNO5JggmYeddYcA)
  - [Product Support](https://www.lips-hci.com/downloads/category)
+ - See details on https://www.youtube.com/watch?v=kyjbJSM6CjQ
 
 ## SDK Overview
-This software development kits(SDK) is fully compatible to [Intel® RealSense™ SDK 2.0](https://github.com/IntelRealSense/librealsense) to assist you connect LIPSedge AE400 Stereo Camera to your application fast and easily. RealSense™ SDK 2.0 already offers many tools, code samples, and wrappers for integration with existing 3rd-party technologies and software languages.
+This software development kits(SDK) is fully compatible to [Intel® RealSense™ SDK 2.0](https://github.com/IntelRealSense/librealsense) to assist you connect LIPSedge AE400 3D camera to your application fast and easily. RealSense™ SDK 2.0 already offers many tools, code samples, and wrappers for integration with existing 3rd-party technologies and software languages.
 
 :pushpin: **Minimum requirement of RealSense™ SDK release is [2.17.1](https://github.com/IntelRealSense/librealsense/releases?after=v2.17.1)** ([learn more](doc/support_list_ae400_realsense_sdk.md))
 
@@ -54,16 +55,16 @@ $ sudo make install
 ```
 
 ## Patch your RealSense™ SDK to support AE400
-LIPS provides a helper shell script to upgrade a clean RealSense SDK git repository automatically to support LIPSedge AE400 stereo camera.
+LIPS provides a helper shell script to upgrade a clean RealSense SDK release automatically to support LIPSedge AE400 3D camera.
 
-* Follow below steps to patch your local RealSense SDK git repository, assume your version is 2.29.0.
+* Follow below steps to patch your local RealSense SDK git repository, assume you want to use release [v2.29.0](https://github.com/IntelRealSense/librealsense/releases/tag/v2.29.0).
 ```
 $ git clone https://github.com/IntelRealSense/librealsense.git ~/rs2
 $ cd ~/rs2
 $ git checkout -b rs2.29.0 v2.29.0
 ``` 
 
-Assume you have cloned [AE400 SDK](https://github.com/lips-hci/ae400-realsense-sdk), switch to it and run the script.
+Clone [AE400 SDK](https://github.com/lips-hci/ae400-realsense-sdk) to your host, switch to it and run the script.
 You have to input path of your RealSense source directory as input argument.
 ```
 $ cd ae400-realsense-sdk

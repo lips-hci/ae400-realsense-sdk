@@ -132,4 +132,5 @@ Ping statistics for 192.168.0.100:
 ...
 ```
 
-**NOTE**: You might get build errors or meet problems to run realsense-viewer on Windows/Linux. Any questions are welcome, please file issue on Github or send your problems to [LIPS](info@lips-hci.com).
+**NOTE**: You might get build errors or meet problems to run realsense-viewer on Windows/Linux. Any questions are welcome, please file issues on Github or send your problems to [LIPS]((https://www.lips-hci.com/contact)).
+:email: info@lips-hci.com

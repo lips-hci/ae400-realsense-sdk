@@ -57,18 +57,19 @@ $ sudo make install
 ## Patch your RealSense™ SDK to support AE400
 LIPS provides a helper shell script to upgrade a clean RealSense SDK release automatically to support LIPSedge AE400 3D camera.
 
-* Follow below steps to patch your local RealSense SDK git repository, assume you want to use release [v2.29.0](https://github.com/IntelRealSense/librealsense/releases/tag/v2.29.0).
+* Follow below steps to patch your local RealSense SDK git repository, assume you want to use release [v2.29.0](https://github.com/IntelRealSense/librealsense/releases/tag/v2.29.0). First, you have to clone libealsense.git to your host.
 ```
-$ git clone https://github.com/IntelRealSense/librealsense.git ~/rs2
+$ git clone https://github.com/IntelRealSense/librealsense.git /home/<username>/rs2
 $ cd ~/rs2
 $ git checkout -b rs2.29.0 v2.29.0
 ``` 
 
-Clone [AE400 SDK](https://github.com/lips-hci/ae400-realsense-sdk) to your host, switch to it and run the script.
-You have to input path of your RealSense source directory as input argument.
+Next step you have to clone [AE400 SDK](https://github.com/lips-hci/ae400-realsense-sdk) to your host, switch to it and run the script, you have to input path of your RealSense source directory as input argument.
 ```
+$ cd /home/<username>/
+$ git clone https://github.com/lips-hci/ae400-realsense-sdk.git
 $ cd ae400-realsense-sdk
-ae400-realsense-sdk$ ./scripts/patch-realsense-to-lips-ae400-sdk.sh ~/rs2
+$ ./scripts/patch-realsense-to-lips-ae400-sdk.sh ~/rs2
 ```
 After successfully patching, you can build AE400 SDK from this source.
 

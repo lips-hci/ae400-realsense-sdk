@@ -62,6 +62,22 @@ LIPS provides a helper shell script to upgrade a clean RealSense SDK release aut
 $ git clone https://github.com/IntelRealSense/librealsense.git /home/<username>/rs2
 $ cd ~/rs2
 $ git checkout -b rs2.29.0 v2.29.0
+Switched to a new branch 'rs2.29.0'
+
+``` 
+
+:hammer: If you use release **2.17.1**, PLEASE merge this fix commit [89b8a02b - Switch to use stable libusb version #3049](https://github.com/IntelRealSense/librealsense/commit/89b8a02b) manually to switch to stable libusb version.
+If your release is **2.18** or later versions, you can ignore this step!
+```
+$ git checkout -b rs2.17.1 v2.17.1
+Switched to a new branch 'rs2.17.1'
+
+$ git cherry-pick 89b8a02b
+[rs2.17.1 7ad72a880] Switch to use stable libusb version (#3049)
+ Author: Sergey Dorodnicov <sergey.dorodnicov@intel.com>
+ Date: Sun Jan 13 18:37:53 2019 +0200
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 ``` 
 
 Next step you have to clone [AE400 SDK](https://github.com/lips-hci/ae400-realsense-sdk) to your host, switch to it and run the script, you have to input path of your RealSense source directory as input argument.

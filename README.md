@@ -1,5 +1,5 @@
 # LIPSedge™ AE400 Industrial 3D Camera
-![ae400 product banner](https://www.lips-hci.com/image/data/AE400/AE400_WEB-BANNER.png)
+![ae400 product banner](AE400_WEB-BANNER.png)
 **LIPSedge™ AE400** is an industrial GigE 3D camera with IP67 protection and powered by Intel® RealSense™ technology and designed for industrial applications, such as robot application, logistic/factory automation, and 3D monitoring/inspection.
 
  - [Product Overview](https://www.lips-hci.com/product?product_id=29)

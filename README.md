@@ -2,10 +2,12 @@
 ![ae400 product banner](AE400_WEB-BANNER.png)
 **LIPSedge™ AE400** is an industrial GigE 3D camera with IP67 protection and powered by Intel® RealSense™ technology and designed for industrial applications, such as robot application, logistic/factory automation, and 3D monitoring/inspection.
 
- - [Product Overview](https://www.lips-hci.com/product-page/lipsedge-ae400-industrial-3d-camer)
- - [Product Datasheet](https://filebox.lips-hci.com/index.php/s/EbObZonlvOhO1rK)
+ - [Product Overview](https://www.lips-hci.com/product-page/lipsedge-ae400-industrial-3d-camera)
+ - [Product Datasheet](https://filebox.lips-hci.com/index.php/s/ZNO5JggmYeddYcA?path=%2FDatasheet)
  - [Developer Support](https://github.com/lips-hci)
- - Watch our latest video on https://www.youtube.com/watch?v=kyjbJSM6CjQ
+ - Product videos
+   * AE400 product 3D view and introduction https://www.youtube.com/watch?v=kyjbJSM6CjQ
+   * AE400 Point Cloud [![Point cloud demo](http://img.youtube.com/vi/oSCOOGzJRbo/default.jpg)](http://www.youtube.com/watch?v=oSCOOGzJRbo "LIPSedge™ AE400 Point Cloud")
 
 ## SDK Overview
 This software development kits(SDK) is fully compatible to [Intel® RealSense™ SDK 2.0](https://github.com/IntelRealSense/librealsense) to assist you connect LIPSedge AE400 3D camera to your application fast and easily. RealSense™ SDK 2.0 already offers many tools, code samples, and wrappers for integration with existing 3rd-party technologies and software languages.

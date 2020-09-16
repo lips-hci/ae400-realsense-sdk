@@ -4,11 +4,20 @@
 #include <numeric>
 #include <librealsense2/rs.hpp>
 #include "depth-quality-model.h"
+#include "easylogging++.h"
+
+#ifdef BUILD_SHARED_LIBS
+// With static linkage, ELPP is initialized by librealsense, so doing it here will
+// create errors. When we're using the shared .so/.dll, the two are separate and we have
+// to initialize ours if we want to use the APIs!
+INITIALIZE_EASYLOGGINGPP
+#endif
 
 int main(int argc, const char * argv[]) try
 {
-    rs2::depth_quality::tool_model model;
-    rs2::ux_window window("Depth Quality Tool");
+    rs2::context ctx;
+    rs2::ux_window window("Depth Quality Tool", ctx);
+    rs2::depth_quality::tool_model model(ctx);
 
     using namespace rs2::depth_quality;
 
@@ -48,7 +57,7 @@ int main(int argc, const char * argv[]) try
                  "             i=1    ");
 
     metric sub_pixel_rms_error = model.make_metric(
-                 "Subpixel RMS Error", 0.f, 1.f, true, "(pixel)",
+                 "Subpixel RMS Error", 0.f, 1.f, true, "pixel",
                  "Subpixel RMS Error .\n"
                  "This metric provides the subpixel accuracy\n"
                  "and is calculated as follows:\n"
@@ -152,7 +161,11 @@ int main(int argc, const char * argv[]) try
         auto rms_error_val = static_cast<float>(std::sqrt(plane_fit_err_sqr_sum / distances.size()));
         auto rms_error_val_per = TO_PERCENT * (rms_error_val / distance_mm);
         plane_fit_rms_error->add_value(rms_error_val_per);
-        if (record) samples.push_back({ plane_fit_rms_error->get_name(),  rms_error_val });
+        if (record)
+        {
+            samples.push_back({ plane_fit_rms_error->get_name(),  rms_error_val_per });
+            samples.push_back({ plane_fit_rms_error->get_name() + " mm",  rms_error_val });
+        }
 
     });
 

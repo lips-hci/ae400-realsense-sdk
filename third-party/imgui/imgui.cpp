@@ -2041,6 +2041,8 @@ void ImGui::NewFrame()
 {
     ImGuiContext& g = *GImGui;
 
+    if (g.IO.DeltaTime < 0.0f) g.IO.DeltaTime = 0.0f;
+
     // Check user data
     IM_ASSERT(g.IO.DeltaTime >= 0.0f);               // Need a positive DeltaTime (zero is tolerated but will cause some timing issues)
     IM_ASSERT(g.IO.DisplaySize.x >= 0.0f && g.IO.DisplaySize.y >= 0.0f);
@@ -6534,7 +6536,6 @@ bool ImGui::SliderBehavior(const ImRect& frame_bb, ImGuiID id, float* v, float v
                 bb.Min.x -= 0.5;
                 bb.Max.x += 0.5;
             }
-            float grab_paddingl = 2.0f;
             //Vertical fills from down upwards
             fill_br.Min = bb.Min;
             fill_br.Min.y = grab_bb.Min.y;

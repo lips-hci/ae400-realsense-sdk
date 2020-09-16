@@ -2,8 +2,6 @@
 // and adapted to be used with Intel RealSense Cameras
 // Please see https://github.com/opencv/opencv/blob/master/LICENSE
 
-#include <iostream>
-#include <iomanip>
 #include <opencv2/dnn.hpp>
 #include <librealsense2/rs.hpp>
 #include "../cv-helpers.hpp"
@@ -26,7 +24,7 @@ int main(int argc, char** argv) try
     using namespace cv::dnn;
     using namespace rs2;
 
-    Net net = readNetFromCaffe("MobileNetSSD_deploy.prototxt",
+    Net net = readNetFromCaffe("MobileNetSSD_deploy.prototxt", 
                                "MobileNetSSD_deploy.caffemodel");
 
     // Start streaming from Intel RealSense Camera
@@ -55,7 +53,7 @@ int main(int argc, char** argv) try
     const auto window_name = "Display Image";
     namedWindow(window_name, WINDOW_AUTOSIZE);
 
-    while (cvGetWindowHandle(window_name))
+    while (getWindowProperty(window_name, WND_PROP_AUTOSIZE) >= 0)
     {
         // Wait for the next set of frames
         auto data = pipe.wait_for_frames();
@@ -65,7 +63,7 @@ int main(int argc, char** argv) try
         auto color_frame = data.get_color_frame();
         auto depth_frame = data.get_depth_frame();
 
-        // If we only received new depth frame,
+        // If we only received new depth frame, 
         // but the color did not update, continue
         static int last_frame_number = 0;
         if (color_frame.get_frame_number() == last_frame_number) continue;
@@ -73,7 +71,7 @@ int main(int argc, char** argv) try
 
         // Convert RealSense frame to OpenCV matrix:
         auto color_mat = frame_to_mat(color_frame);
-        auto depth_mat = depth_frame_to_meters(pipe, depth_frame);
+        auto depth_mat = depth_frame_to_meters(depth_frame);
 
         Mat inputBlob = blobFromImage(color_mat, inScaleFactor,
                                       Size(inWidth, inHeight), meanVal, false); //Convert Mat to batch of images
@@ -108,8 +106,8 @@ int main(int argc, char** argv) try
 
                 // Calculate mean depth inside the detection region
                 // This is a very naive way to estimate objects depth
-                // but it is intended to demonstrate how one might
-                // use depht data in general
+                // but it is intended to demonstrate how one might 
+                // use depth data in general
                 Scalar m = mean(depth_mat(object));
 
                 std::ostringstream ss;
@@ -126,7 +124,7 @@ int main(int argc, char** argv) try
 
                 rectangle(color_mat, Rect(Point(center.x, center.y - labelSize.height),
                     Size(labelSize.width, labelSize.height + baseLine)),
-                    Scalar(255, 255, 255), CV_FILLED);
+                    Scalar(255, 255, 255), FILLED);
                 putText(color_mat, ss.str(), center,
                         FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,0,0));
             }

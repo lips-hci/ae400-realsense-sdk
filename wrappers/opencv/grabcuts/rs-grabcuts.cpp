@@ -1,7 +1,6 @@
 // License: Apache 2.0. See LICENSE file in root directory.
 // Copyright(c) 2017 Intel Corporation. All Rights Reserved.
 
-#include <iostream>
 #include <librealsense2/rs.hpp> // Include RealSense Cross Platform API
 #include <opencv2/opencv.hpp>   // Include OpenCV API
 #include "../cv-helpers.hpp"    // Helper functions for conversions between RealSense and OpenCV
@@ -46,10 +45,10 @@ int main(int argc, char * argv[]) try
     // Skips some frames to allow for auto-exposure stabilization
     for (int i = 0; i < 10; i++) pipe.wait_for_frames();
 
-    while (waitKey(1) < 0 && cvGetWindowHandle(window_name))
+    while (waitKey(1) < 0 && getWindowProperty(window_name, WND_PROP_AUTOSIZE) >= 0)
     {
         frameset data = pipe.wait_for_frames();
-        // Make sure the frameset is spatialy aligned
+        // Make sure the frameset is spatialy aligned 
         // (each pixel in depth image corresponds to the same pixel in the color image)
         frameset aligned_set = align_to.process(data);
         frame depth = aligned_set.get_depth_frame();
@@ -62,27 +61,27 @@ int main(int argc, char * argv[]) try
 
         // Generate "near" mask image:
         auto near = frame_to_mat(bw_depth);
-        cvtColor(near, near, CV_BGR2GRAY);
+        cvtColor(near, near, COLOR_BGR2GRAY);
         // Take just values within range [180-255]
         // These will roughly correspond to near objects due to histogram equalization
         create_mask_from_depth(near, 180, THRESH_BINARY);
 
         // Generate "far" mask image:
         auto far = frame_to_mat(bw_depth);
-        cvtColor(far, far, CV_BGR2GRAY);
-        far.setTo(255, far == 0); // Note: 0 value does not indicate pixel near the camera, and requires special attention
+        cvtColor(far, far, COLOR_BGR2GRAY);
+        far.setTo(255, far == 0); // Note: 0 value does not indicate pixel near the camera, and requires special attention 
         create_mask_from_depth(far, 100, THRESH_BINARY_INV);
 
         // GrabCut algorithm needs a mask with every pixel marked as either:
         // BGD, FGB, PR_BGD, PR_FGB
         Mat mask;
-        mask.create(near.size(), CV_8UC1);
+        mask.create(near.size(), CV_8UC1); 
         mask.setTo(Scalar::all(GC_BGD)); // Set "background" as default guess
         mask.setTo(GC_PR_BGD, far == 0); // Relax this to "probably background" for pixels outside "far" region
         mask.setTo(GC_FGD, near == 255); // Set pixels within the "near" region to "foreground"
 
         // Run Grab-Cut algorithm:
-        Mat bgModel, fgModel;
+        Mat bgModel, fgModel; 
         grabCut(color_mat, mask, Rect(), bgModel, fgModel, 1, GC_INIT_WITH_MASK);
 
         // Extract foreground pixels based on refined mask from the algorithm

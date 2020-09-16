@@ -8,12 +8,11 @@ set(REALSENSE2_DIR "c:/Program Files (x86)/Intel RealSense SDK 2.0" CACHE FILEPA
 # INCLUDE DIR
 if (UNIX)
     include_directories (${OPENNI2_DIR})
-    include_directories (${CMAKE_SOURCE_DIR}/include)
 else ()
     include_directories (${OPENNI2_DIR}/Include)
-    include_directories (${REALSENSE2_DIR}/include)
 endif ()
 
+include_directories (${REALSENSE2_DIR}/include)
 include_directories (src)
 
 # LINK DIR
@@ -55,4 +54,4 @@ endif()
 
 # LINK
 add_library (rs2driver SHARED ${INCLUDE_FILES} ${SRC_FILES})
-target_link_libraries (rs2driver realsense2 -Wl,-rpath,$ORIGIN)
+target_link_libraries (rs2driver realsense2)

@@ -94,7 +94,7 @@ namespace librealsense
         float exposure = 10.0f, gain = 2.0f, target_exposure = 0.0f;
         uint8_t under_exposure_limit = 5, over_exposure_limit = 250; int under_exposure_noise_limit = 50, over_exposure_noise_limit = 50;
         int direction = 0, prev_direction = 0; float hysteresis = 0.075f;// 05;
-        float eps = 0.01f, minimal_exposure_step = 0.01f;
+        float eps = 0.01f;
         std::atomic<float> exposure_step;
         auto_exposure_state state; float flicker_cycle; bool anti_flicker_mode = true;
         region_of_interest roi{};
@@ -102,16 +102,11 @@ namespace librealsense
         std::recursive_mutex state_mutex;
     };
 
-    struct frame_and_callback{
-        frame_holder f_holder;
-        callback_invocation_holder callback;
-    };
-
     class auto_exposure_mechanism {
     public:
         auto_exposure_mechanism(option& gain_option, option& exposure_option, const auto_exposure_state& auto_exposure_state);
         ~auto_exposure_mechanism();
-        void add_frame(frame_holder frame, callback_invocation_holder callback);
+        void add_frame(frame_holder frame);
         void update_auto_exposure_state(const auto_exposure_state& auto_exposure_state);
         void update_auto_exposure_roi(const region_of_interest& roi);
 
@@ -129,8 +124,6 @@ namespace librealsense
         };
 
     private:
-        bool try_pop_front_data(frame_and_callback* data);
-
         static const int                          queue_size = 2;
         option&                                   _gain_option;
         option&                                   _exposure_option;
@@ -138,7 +131,7 @@ namespace librealsense
         std::shared_ptr<std::thread>              _exposure_thread;
         std::condition_variable                   _cv;
         std::atomic<bool>                         _keep_alive;
-        single_consumer_queue<frame_and_callback> _data_queue;
+        single_consumer_queue<frame_holder>       _data_queue;
         std::mutex                                _queue_mtx;
         std::atomic<unsigned>                     _frames_counter;
         std::atomic<unsigned>                     _skip_frames;

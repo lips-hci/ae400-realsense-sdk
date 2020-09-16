@@ -1,55 +1,44 @@
 # Remove src because we link to prebuilt backend-ethernet lib
-set(REMOVE_CPP
-    ../../src/linux/backend-v4l2.cpp
-    ../../src/linux/backend-hid.cpp
-    ../../src/win/win-uvc.cpp
-    ../../src/win/win-usb.cpp
-    ../../src/win/win-hid.cpp
-    ../../src/win/win-backend.cpp
-)
-set(REMOVE_HPP
-    ../../src/linux/backend-v4l2.h
-    ../../src/linux/backend-hid.h
-)
-# after RS2 API 2.22, backend WMF_BACKEND requires win-helpers.cpp
-if(${REALSENSE_VERSION_STRING} VERSION_LESS 2.22)
-    list(APPEND REMOVE_CPP
-            ../../src/win/win-helpers.cpp
-        )
-    endif()
-# another approach...
-#if(${REALSENSE_VERSION_STRING} VERSION_GREATER 2.21)
-#    if((${BACKEND} STREQUAL RS2_USE_WMF_BACKEND))
-#        list(REMOVE_ITEM REMOVE_CPP
-#            ../../src/win/win-helpers.cpp
-#        )
-#    endif()
-#endif()
-
-if(DEFINED RAW_RS_CPP)
-    list(REMOVE_ITEM RAW_RS_CPP ${REMOVE_CPP})
-endif()
-if(DEFINED RAW_RS_HPP)
-    list(REMOVE_ITEM RAW_RS_HPP ${REMOVE_HPP})
-endif()
-if(DEFINED RS_CPP)
-    list(REMOVE_ITEM RS_CPP ${REMOVE_CPP} ${REMOVE_HPP})
+if(${BACKEND} STREQUAL RS2_USE_V4L2_BACKEND)
+    list(APPEND RAW_RS
+        ../../src/linux/ae400-imu.cpp
+    )
+    set(REMOVE_RAW_RS
+        ../../src/linux/backend-v4l2.cpp
+        ../../src/linux/backend-hid.cpp
+    )
 endif()
 
+if(${BACKEND} STREQUAL RS2_USE_WMF_BACKEND)
+    list(APPEND RAW_RS
+        ../../src/mf/ae400-imu.cpp
+    )
+    set(REMOVE_RAW_RS
+        ../../src/mf/mf-uvc.cpp
+        ../../src/mf/mf-hid.cpp
+        ../../src/mf/mf-backend.cpp
+    )
+endif()
+
+# HACK: introduce definition to fix LNK2005:GUID_DEVINTERFACE_USB_DEVICE
+# already defined in wih-helpers.obj error, it conflicts to usb.lib(windows_winusb.obj
+if(WIN32 AND USE_EXTERNAL_USB)
+    target_compile_definitions(pybackend2 PRIVATE WITH_TRACKING=1)
+endif()
+
+if(DEFINED RAW_RS)
+    list(REMOVE_ITEM RAW_RS ${REMOVE_RAW_RS})
+endif()
+
+# Replace the pybackend2 source CPP by linking to our prebuilt lib
 if(TARGET pybackend2)
+    target_link_libraries(pybackend2 PRIVATE backend-ethernet)
 
-if(USE_EXTERNAL_USB)
-    include_directories(pybackend2 ${LIBUSB_LOCAL_INCLUDE_PATH})
-endif()
+    get_target_property(PYBIND_SRC pybackend2 SOURCES)
 
-target_link_libraries(pybackend2 PRIVATE backend-ethernet)
+    list(REMOVE_ITEM PYBIND_SRC ${REMOVE_RAW_RS})
 
-get_target_property(PYBIND_SRC pybackend2 SOURCES)
-
-list(REMOVE_ITEM PYBIND_SRC ${REMOVE_CPP} ${REMOVE_HPP})
-
-set_target_properties(pybackend2 PROPERTIES
-    SOURCES "${PYBIND_SRC}"
-)
-
+    set_target_properties(pybackend2 PROPERTIES
+        SOURCES "${PYBIND_SRC}"
+    )
 endif()

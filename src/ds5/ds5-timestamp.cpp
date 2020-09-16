@@ -60,24 +60,25 @@ namespace librealsense
             pin_index = 1;
 
         _has_metadata[pin_index] = has_metadata(frame);
-#if 0
+
         auto md = (librealsense::metadata_intel_basic*)(f->additional_data.metadata_blob.data());
         if(_has_metadata[pin_index] && md)
         {
+#ifndef NOT_SUPPORT_DS5_TIMESTAMP
             return (double)(md->header.timestamp)*TIMESTAMP_USEC_TO_MSEC;
+#else
+            return _backup_timestamp_reader->get_frame_timestamp(frame);
+#endif
         }
         else
         {
-#endif
             if (!one_time_note)
             {
                 LOG_WARNING("UVC metadata payloads not available. Please refer to the installation chapter for details.");
                 one_time_note = true;
             }
             return _backup_timestamp_reader->get_frame_timestamp(frame);
-#if 0
         }
-#endif
     }
 
     unsigned long long ds5_timestamp_reader_from_metadata::get_frame_counter(const std::shared_ptr<frame_interface>& frame) const

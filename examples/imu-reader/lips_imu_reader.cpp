@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <librealsense2/rs.hpp>
-#include "librealsense2/lips_ae400_imu.h"
+#include <librealsense2/lips_ae400_imu.h>
 
 #define IMG_WIDTH 640
 #define IMG_HEIGHT 480
@@ -15,7 +15,7 @@
 #define IMG_FPS_DOU 60
 #define IMG_FPS_TRI 90
 
-
+using namespace lips::ae400;
 using namespace std;
 enum showOp
 {
@@ -27,6 +27,7 @@ enum showOp
 int getUserInput()
 {
 	int option = 0;
+#if 0
 	cout << "1) Depth only" << endl;
 	cout << "2) Image only" << endl;
 	cout << "3) IR only" << endl;
@@ -36,7 +37,9 @@ int getUserInput()
 	cout << "7) All" << endl;
 	cout << "0) Exit" << endl;
 	cout << "Please input your choice : ";
-	cin >> option;
+#endif
+	//cin >> option;
+	option=1; //depth only
 	switch (option)
 	{
 	case 1:
@@ -98,7 +101,7 @@ void showResolution(int option)
 
 int main()
 {
-	
+
 	int option = getUserInput();
 
 	if (0 == option)
@@ -127,9 +130,10 @@ int main()
 	{
 		int answer = 1;
 		//system("CLS");
-		std::cout << "Available options for Depth : " << endl;
-		showResolution(DEPTH);
-		std::cin >> answer;
+		//std::cout << "Available options for Depth : " << endl;
+		//showResolution(DEPTH);
+		//std::cin >> answer;
+		answer=5;//vga resolution
 		switch (answer)
 		{
 		case 1:
@@ -236,12 +240,14 @@ int main()
 		rs2::frame depth_frame = frames.get_depth_frame();
 		rs2::frame rgb_frame = frames.get_color_frame();
 		rs2::frame ir_frame = frames.get_infrared_frame();
-		
-		if (depth_frame)
+
+        lips_ae400_imu data;
+		if (depth_frame && get_imu_data(0, &data) == 0)
 		{
-			printf("imu accel x =%f , accel y =%f , accel z =%f \n ", imu_data.accel_x, imu_data.accel_y, imu_data.accel_z);
-			printf("imu gyro x =%f , gyro y =%f , gyro z =%f \n ", imu_data.gyro_x, imu_data.gyro_y, imu_data.gyro_z);
-			printf("imu timestamp=%lld\n", imu_data.timestamp);
+			printf("IMU accel (x,y,z,timestamp) = (%.3f, %.3f, %.3f, %llu)\n ",
+                    data.accel_x, data.accel_y, data.accel_z, data.timestamp);
+			printf("IMU gyro  (x,y,z,timestamp) = (%.3f, %.3f, %.3f, %llu)\n ",
+                    data.gyro_x, data.gyro_y, data.gyro_z, data.timestamp);
 		}
 	}
 	return 0;

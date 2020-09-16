@@ -10,7 +10,7 @@ if(WIN32)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config/network.json"
         DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
 )
-add_custom_target(install_network_config
+add_custom_target(install_network_config ALL
     SOURCES config/network.json
     COMMAND ${CMAKE_COMMAND} -E copy
         "config/network.json"

@@ -21,11 +21,11 @@ This software development kits(SDK) is fully compatible to [Intel® RealSense™
 | master    | [v1.0.0.2](https://www.lips-hci.com/lipssdk) | v2.1          | v2.32.0 | v2.32 ~ present |
 | sdk-v0907 | v0.9.0.7                                     | v1.4          | v2.17.1 | v2.17 ~ v2.21 ([learn more](doc/support_list_ae400_realsense_sdk.md)) |
 
-* :new: LIPS SDK v1.0.0.2
+:new: LIPS SDK v1.0.0.2
 
-This version supports multicam, that means you can connect 2 or even more AE400 cameras. However, more AE400 camera means requiring more CPU computing ability on host, and your Gigabit PoE switch also have to provide sufficient power to all the connected cameras.
+* This latest SDK supports multicam, that means you can connect 2 or even more AE400 cameras. However, more AE400 camera means requiring more CPU computing ability on host side, and your Gigabit PoE switch also have to provide sufficient power to all the connected cameras.
  - [Release Note](https://filebox.lips-hci.com/index.php/s/twUlwqdzNFl7RAc?path=%2FUser%20Guide)
- - [FW Update Guide](https://filebox.lips-hci.com/index.php/s/twUlwqdzNFl7RAc?path=%2FUser%20Guide)(see Ch.8 for Updating Firmware)
+ - [FW Update Guide](https://filebox.lips-hci.com/index.php/s/twUlwqdzNFl7RAc?path=%2FUser%20Guide) (see Ch.8.5 for Firmware Update)
 
 ## Build instruction
 You need CMake to build this SDK, please refer steps described on RealSense™ SDK document.
@@ -103,9 +103,9 @@ rs2/build_Release$ vim config/network.json
 ```
 Default IP address is 192.168.0.100. You have to modify it according to your network environment.
 
-:wrench: Latest LIPS SDK v1.0.0.2 supports multicam, you could specify different IP addresses for 2 or more AE400 cameras, just input how many cameras you are going to connect with in the setting property 'count' and assign IP address for each camera. (ip1, ip2, ip3,... and so on)
+:wrench: Latest [LIPS SDK v1.0.0.2](https://www.lips-hci.com/lipssdk) supports multicam, you could specify different IP addresses for 2 or more AE400 cameras, just input how many cameras you are going to connect with in the setting property 'count' and assign IP address for each camera. (ip1, ip2, ip3,... and so on)
 
-* Network config for SDK v1.0.0.2 (multicam)
+* Network config for LIPS SDK v1.0.0.2 (multicam)
 ```
 {
     "count": "2",
@@ -116,7 +116,7 @@ Default IP address is 192.168.0.100. You have to modify it according to your net
 }
 ```
 
-* Network config for SDK v0.9.0.7 (single cam)
+* Network config for LIPS SDK v0.9.0.7 (single cam)
 ```
 {
     "config": {

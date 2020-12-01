@@ -64,11 +64,7 @@ namespace librealsense
         auto md = (librealsense::metadata_intel_basic*)(f->additional_data.metadata_blob.data());
         if(_has_metadata[pin_index] && md)
         {
-#ifndef NOT_SUPPORT_DS5_TIMESTAMP
             return (double)(md->header.timestamp)*TIMESTAMP_USEC_TO_MSEC;
-#else
-            return _backup_timestamp_reader->get_frame_timestamp(frame);
-#endif
         }
         else
         {

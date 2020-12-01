@@ -173,7 +173,7 @@ namespace librealsense
             std::lock_guard<std::recursive_mutex> lock(_mtx);
             double system_time_start = duration<double, std::milli>(system_clock::now().time_since_epoch()).count();
 
-            double sample_hw_time = _device->get_device_time_ms();
+            double sample_hw_time = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
             double system_time_finish = duration<double, std::milli>(system_clock::now().time_since_epoch()).count();
             double command_delay = (system_time_finish-system_time_start)/2;
 

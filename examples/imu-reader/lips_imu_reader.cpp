@@ -5,6 +5,8 @@
 #include <iostream>
 #include <librealsense2/rs.hpp>
 #include <librealsense2/lips_ae400_imu.h>
+#include <ctime>
+#include <string.h>
 
 #define IMG_WIDTH 640
 #define IMG_HEIGHT 480
@@ -97,6 +99,16 @@ void showResolution(int option)
 		cout << "VGA ( 640 x 480 ), FPS = 30" << endl;
 		break;
 	}
+}
+
+void format_time(char* strtime, const int strsize, const uint64_t timestamp_ms)
+{
+	struct tm *timeinfo;
+	unsigned int tms = (timestamp_ms % 1000);
+	time_t tsec = static_cast<time_t>(timestamp_ms/1000);
+	timeinfo = localtime(&tsec);
+	strftime(strtime, strsize, "%F %T", timeinfo);
+	snprintf(strtime + strlen(strtime), strsize - strlen(strtime), ".%03u", tms);
 }
 
 int main()
@@ -241,13 +253,15 @@ int main()
 		rs2::frame rgb_frame = frames.get_color_frame();
 		rs2::frame ir_frame = frames.get_infrared_frame();
 
-        lips_ae400_imu data;
+		lips_ae400_imu data;
 		if (depth_frame && get_imu_data(0, &data) == 0)
 		{
-			printf("IMU accel (x,y,z,timestamp) = (%.3f, %.3f, %.3f, %llu)\n ",
-                    data.accel_x, data.accel_y, data.accel_z, data.timestamp);
-			printf("IMU gyro  (x,y,z,timestamp) = (%.3f, %.3f, %.3f, %llu)\n ",
-                    data.gyro_x, data.gyro_y, data.gyro_z, data.timestamp);
+			char strtime[80] = "";
+			format_time(strtime, sizeof(strtime), static_cast<uint64_t>(depth_frame.get_timestamp()));
+			printf("%s: Depth frame number = %6lu\n", strtime, (unsigned long)depth_frame.get_frame_number());
+			format_time(strtime, sizeof(strtime), static_cast<uint64_t>(data.timestamp));
+			printf("%s: IMU  gyro(x,y,z) = (%.6f, %.6f, %.6f)\n", strtime, data.gyro_x, data.gyro_y, data.gyro_z);
+			printf("%s: IMU accel(x,y,z) = (%.6f, %.6f, %.6f)\n", strtime, data.accel_x, data.accel_y, data.accel_z);
 		}
 	}
 	return 0;

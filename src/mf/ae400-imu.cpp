@@ -3,14 +3,20 @@
 /* License: Apache 2.0. See LICENSE file in root directory.
    Copyright(c) 2020 LIPS Corporation. All Rights Reserved. */
 
+#ifdef ENABLE_AE400_IMU
 #define BUILD_SDK
-#include "ae400-imu.h"
+#else
+#undef BUILD_SDK
+#endif
+#include <librealsense2/lips_ae400_imu.h>
 
 namespace lips
 {
     namespace ae400
     {
-        API_DECLARE int get_imu_data(int ip_index, lips_ae400_imu *data)
+        lips_ae400_imu _query_imu(int index);
+
+        int get_imu_data(int ip_index, lips_ae400_imu *data)
         {
             if (data && (0 <= ip_index && ip_index < MAX_IP_INDEX))
             {

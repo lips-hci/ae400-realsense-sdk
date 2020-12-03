@@ -5,7 +5,6 @@
 target_sources(${LRS_TARGET}
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/ae400-imu.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/ae400-imu.h"
 )
 
 if(WIN32)

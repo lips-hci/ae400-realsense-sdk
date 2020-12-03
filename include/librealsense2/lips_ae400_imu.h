@@ -55,6 +55,9 @@ namespace lips
 {
     namespace ae400
     {
+        //up to 100 IP addresses can be allocated for ae400 camera
+        #define MAX_IP_INDEX 100
+
         /* get_imu_data
         *    retrieve IMU sensor data from AE400 camera
         * input:

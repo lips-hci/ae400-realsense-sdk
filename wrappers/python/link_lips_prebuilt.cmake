@@ -26,6 +26,8 @@ if(WIN32 AND USE_EXTERNAL_USB)
     target_compile_definitions(pybackend2 PRIVATE WITH_TRACKING=1)
 endif()
 
+target_compile_definitions(pybackend2 PRIVATE ENABLE_AE400_IMU)
+
 if(DEFINED RAW_RS)
     list(REMOVE_ITEM RAW_RS ${REMOVE_RAW_RS})
 endif()

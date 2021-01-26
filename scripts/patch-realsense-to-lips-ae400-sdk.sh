@@ -100,6 +100,7 @@ for srcfile in $AE4_GIT/src/mf/*; do
 done
 #rsync -avrhP --delete --exclude 'mf-*.h' $AE4_GIT/src/mf/ $RS2_GIT/src/mf/
 
+mkdir -p $RS2_GIT/third-party/lips
 for srcfile in $AE4_GIT/third-party/lips/*; do
     cp -vrfP $srcfile $RS2_GIT/third-party/lips/
 done

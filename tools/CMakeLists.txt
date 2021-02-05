@@ -17,6 +17,7 @@ add_subdirectory(fw-logger)
 add_subdirectory(terminal)
 add_subdirectory(recorder)
 add_subdirectory(fw-update)
+add_subdirectory(ae400-toolkit)
 
 if(NOT WIN32)
     if(BUILD_NETWORK_DEVICE)

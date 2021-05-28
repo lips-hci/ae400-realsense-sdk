@@ -28,7 +28,7 @@ else()
 endif()
 
 if(${REALSENSE_VERSION_STRING} VERSION_LESS 2.32)
-    message(FATAL_ERROR "RealSense SDK codebase requires v2.32 or later version")
+    message(FATAL_ERROR "AE400 SDK requires RealSense SDK codebase v2.32 or later version")
 else()
     set(LIBVERSION 1.0.0.2)
 endif()

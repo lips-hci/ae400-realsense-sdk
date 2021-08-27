@@ -1,6 +1,6 @@
 # License: Apache 2.0. See LICENSE file in root directory.
 # Copyright(c) 2019 Intel Corporation. All Rights Reserved.
-# Copyright(c) 2020 LIPS Corporation. All Rights Reserved.
+# Copyright(c) 2020-2021 LIPS Corporation. All Rights Reserved.
 # Export IMU get API to our librealsense
 target_sources(${LRS_TARGET}
     PRIVATE
@@ -27,10 +27,10 @@ else()
     string(STRIP ${TARGET_ARCH} TARGET_ARCH)
 endif()
 
-if(${REALSENSE_VERSION_STRING} VERSION_LESS 2.32)
-    message(FATAL_ERROR "AE400 SDK requires RealSense SDK codebase v2.32 or later version")
+if(${REALSENSE_VERSION_STRING} VERSION_LESS 2.38)
+    message(FATAL_ERROR "AE400 SDK requires RealSense SDK codebase v2.38 or later version")
 else()
-    set(LIBVERSION 1.0.0.2)
+    set(LIBVERSION 1.0.0.5)
 endif()
 
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
@@ -51,10 +51,15 @@ find_library(LIB_BACKEND_ETHERNET_DEBUG
 
 if(${LIB_BACKEND_ETHERNET} STREQUAL "LIB_BACKEND_ETHERNET-NOTFOUND")
     message(FATAL_ERROR "backend-ethernet library not found! Please check github.com/lips-hci")
-elseif(NOT TARGET backend-ethernet)
-    add_library(backend-ethernet STATIC IMPORTED)
+else()
+    if(NOT TARGET backend-ethernet)
+        add_library(backend-ethernet STATIC IMPORTED)
+    endif()
     set_target_properties(backend-ethernet PROPERTIES
+        IMPORTED_LOCATION ${LIB_BACKEND_ETHERNET}
         IMPORTED_LOCATION_RELEASE ${LIB_BACKEND_ETHERNET}
+        IMPORTED_LOCATION_MINSIZEREL ${LIB_BACKEND_ETHERNET}
+        IMPORTED_LOCATION_RELWITHDEBINFO ${LIB_BACKEND_ETHERNET}
         IMPORTED_LOCATION_DEBUG ${LIB_BACKEND_ETHERNET_DEBUG}
     )
     message(STATUS "Found backend-ethernet library: ${LIB_BACKEND_ETHERNET}")
@@ -77,4 +82,5 @@ message(STATUS "Disable global time by defining RASPBERRY_PI")
 #Date: Thu, 26 Mar 2020 03:52:54 -0700
 #Subject: [PATCH] Disable global time on RPi
 target_compile_definitions(${LRS_TARGET} PRIVATE RASPBERRY_PI)
+
 endif()

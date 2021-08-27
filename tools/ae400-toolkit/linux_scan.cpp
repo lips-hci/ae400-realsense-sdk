@@ -1,5 +1,17 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <string.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <ifaddrs.h>
+
 #include <algorithm>
+#include <string>
+#include <vector>
 
 #include "linux_scan.h"
 
@@ -17,7 +29,62 @@ char* format_devinfo(const int i)
     return strdup(devinfo);
 }
 
-void udp_broadcast_clinet(int timeout_ms)
+void get_ifaddrs_name(const char *ifaddrs[], int *ifnum)
+{
+    struct ifaddrs *_ifaddr, *ifa;
+    int family, s, n = 0;
+    char host[NI_MAXHOST];
+
+    if (getifaddrs(&_ifaddr) == -1) {
+        perror("getifaddrs");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Walk through linked list, maintaining head pointer so we
+       can free list later */
+
+    for (ifa = _ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL)
+            continue;
+
+        family = ifa->ifa_addr->sa_family;
+
+        /* Display interface name and family (including symbolic
+           form of the latter for the common families) */
+
+        //printf("%-8s %s (%d)\n",
+        //       ifa->ifa_name,
+        //       (family == AF_PACKET) ? "AF_PACKET" :
+        //       (family == AF_INET) ? "AF_INET" :
+        //       (family == AF_INET6) ? "AF_INET6" : "???",
+        //       family);
+
+        /* For an AF_INET* interface address, display the address */
+
+        if (family == AF_INET) {
+            s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in),
+                    host, NI_MAXHOST,
+                    NULL, 0, NI_NUMERICHOST);
+            if (s != 0) {
+                printf("getnameinfo() failed: %s\n", gai_strerror(s));
+                continue;
+            }
+            if (!strcmp(host, "127.0.0.1") || !strcmp(host, "0.0.0.0")) {
+                continue; //Bypass ZERO or loopback interface
+            }
+            //printf("%d\tdev:<%s>\t\taddress:<%s>\n", n, ifa->ifa_name, host);
+            ifaddrs[n++] = strdup(host);
+        }
+    }
+
+    if (_ifaddr)
+        freeifaddrs(_ifaddr);
+
+    *ifnum = n;
+    return;
+}
+
+void udp_broadcast_client(int timeout_ms)
 {
     int sockfd, yes = 1;
     struct sockaddr_in serv_addr, client_addr;
@@ -53,7 +120,7 @@ void udp_broadcast_clinet(int timeout_ms)
 
     FD_ZERO( &readfds );
     FD_SET( sockfd, &readfds );
-    tv.tv_sec = (timeout_ms / 1000); //timeout default is 2000ms
+    tv.tv_sec = (timeout_ms / 1000);
     tv.tv_usec = (timeout_ms - (tv.tv_sec*1000))*1000;
     select( sockfd + 1, &readfds, NULL, NULL, &tv );
     if ( FD_ISSET( sockfd, &readfds ) )
@@ -73,7 +140,7 @@ void udp_broadcast_clinet(int timeout_ms)
             AE400_IP_Client.push_back( ip4 );
             AE400_SN_Client.push_back( buf );
             int new_found = AE400_IP_Client.size() - 1;
-            printf("%s", format_devinfo(new_found));
+            printf("%s\n", format_devinfo(new_found));
         }
     }
 
@@ -81,10 +148,11 @@ void udp_broadcast_clinet(int timeout_ms)
     return;
 }
 
-void udp_broadcast(int timeout_ms)
+void _udp_broadcast(const char* hostaddr, const int timeout_ms)
 {
     int sockfd, so_broadcast = 1;
     struct sockaddr_in server_addr, client_addr;
+    struct hostent *he;
 
     /*Create an IPv4 UDP socket*/
     if ( ( sockfd = socket( PF_INET, SOCK_DGRAM, 0 ) ) < 0 )
@@ -100,9 +168,14 @@ void udp_broadcast(int timeout_ms)
         return;
     }
 
+    if ( ( he = gethostbyname(hostaddr) ) == NULL ) {
+        perror( "gethostbyname" );
+        return;
+    }
+
     server_addr.sin_family = AF_INET; /*IPv4*/
     server_addr.sin_port = htons( INADDR_ANY ); /*All the port*/
-    server_addr.sin_addr.s_addr = htonl( INADDR_BROADCAST ); /*Broadcast address*/
+    server_addr.sin_addr.s_addr = inet_addr(hostaddr); /*Broadcast address*/
 
     if ( ( bind( sockfd, ( struct sockaddr* )&server_addr, sizeof( struct sockaddr ) ) ) != 0 )
     {
@@ -119,9 +192,26 @@ void udp_broadcast(int timeout_ms)
     if ( ( sendto( sockfd, "AE400-echo", sizeof( "AE400-echo" ), 0, ( struct sockaddr* )&client_addr, sizeof( struct sockaddr ) ) ) < 0 )
         perror( "sendto" );
     else
-        udp_broadcast_clinet(timeout_ms);
+        udp_broadcast_client(timeout_ms);
 
     close( sockfd );
+    return;
+}
+
+void udp_broadcast(int timeout_ms)
+{
+    static const char *ifaddrs[32] = {""};
+    static int ifnum = 32;
+
+    if (ifaddrs[0] == "") {
+        get_ifaddrs_name(ifaddrs, &ifnum);
+    }
+
+    //ifnum will be updated to how many of network interface/adapter on this host
+    for (int i = 0; i < ifnum; i++) {
+        _udp_broadcast(ifaddrs[i], timeout_ms);
+    }
+
     return;
 }
 
@@ -131,7 +221,7 @@ void show_AE400_info()
     AE400_SN_Client.clear();
 
     printf( "====== Scan Result ======\n\n" );
-    for ( int i = 0; i < 10; i++) {
+    for ( int i = 0; i < 4; i++) {
         udp_broadcast();
     }
     printf( "====== Scan End    ======\n\n" );

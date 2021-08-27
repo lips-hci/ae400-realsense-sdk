@@ -29,6 +29,7 @@ set (unit_tests_sources
     unit-tests-main.cpp
     unit-tests-common.h
     unit-tests-post-processing-from-bag.cpp
+    unit-test-long.cpp
     catch.h
     approx.h
 )
@@ -153,7 +154,7 @@ function(is_file_empty empty filename)
     set(empty ${res} PARENT_SCOPE)
 endfunction()
 
-set(PP_TESTS_URL http://realsense-hw-public.s3.amazonaws.com/rs-tests/post_processing_tests_2018_ww18/)
+set(PP_TESTS_URL  https://librealsense.intel.com/rs-tests/post_processing_tests_2018_ww18/)
 message(STATUS "Preparing to download Post-processing tests dataset...\nRemote server: ${PP_TESTS_URL}\nTarget Location: ${Deployment_Location}\n")
 foreach(i ${PP_Tests_List})
   set(Test_Pattern ${i})
@@ -198,7 +199,7 @@ list(APPEND PP_Rosbag_Recordings_List
     single_depth_color_640x480.bag
     D435i_Depth_and_IMU.bag
 )
- set(PP_Rosbag_Recordings_URL http://realsense-hw-public.s3.amazonaws.com/rs-tests/Rosbag_unit_test_records/)
+ set(PP_Rosbag_Recordings_URL  https://librealsense.intel.com/rs-tests/Rosbag_unit_test_records/)
 foreach(i ${PP_Rosbag_Recordings_List})
     set (empty FALSE)
     is_file_empty(empty, ${Deployment_Location}${i} )

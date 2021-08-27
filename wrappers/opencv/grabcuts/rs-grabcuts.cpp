@@ -4,6 +4,8 @@
 #include <librealsense2/rs.hpp> // Include RealSense Cross Platform API
 #include <opencv2/opencv.hpp>   // Include OpenCV API
 #include "../cv-helpers.hpp"    // Helper functions for conversions between RealSense and OpenCV
+#include <string>
+#include <iostream>
 
 int main(int argc, char * argv[]) try
 {

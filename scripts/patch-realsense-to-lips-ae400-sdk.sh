@@ -63,10 +63,13 @@ rsync -avrhP --delete $AE4_GIT/include/librealsense2/lips_ae400_imu.h $RS2_GIT/i
 rsync -avrhP --delete $AE4_GIT/examples/imu-reader/ $RS2_GIT/examples/imu-reader/
 printf "\nadd_subdirectory(imu-reader)\n" >> $RS2_GIT/examples/CMakeLists.txt
 
+rsync -avrhP --delete $AE4_GIT/tools/ae400-toolkit/ $RS2_GIT/tools/ae400-toolkit/
+printf "\nadd_subdirectory(ae400-toolkit)\n" >> $RS2_GIT/tools/CMakeLists.txt
+
 getdevicetimems=$(grep -i '_device->get_device_time_ms()' "$RS2_GIT/src/global_timestamp_reader.cpp")
 if [ "$getdevicetimems" != "" ]; then
 echo "Patch src/global_timestamp_reader.cpp with new hardware time ms representation"
-newhwtimems="duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count()"
+newhwtimems="duration<double, std::milli>(system_clock::now().time_since_epoch()).count()"
 sed -i -e "s/_device->get_device_time_ms()/$newhwtimems/g" $RS2_GIT/src/global_timestamp_reader.cpp
 fi
 
@@ -126,10 +129,17 @@ done
 #rsync -avrhP --delete $AE4_GIT/examples/imu-reader/ $RS2_GIT/examples/imu-reader/
 printf "\nadd_subdirectory(imu-reader)\n" >> $RS2_GIT/examples/CMakeLists.txt
 
+[ ! -e $RS2_GIT/tools/ae400-toolkit ] && mkdir $RS2_GIT/tools/ae400-toolkit
+for srcfile in $AE4_GIT/tools/ae400-toolkit/*; do
+    cp -vrfP $srcfile $RS2_GIT/tools/ae400-toolkit/
+done
+#rsync -avrhP --delete $AE4_GIT/tools/ae400-toolkit/ $RS2_GIT/tools/ae400-toolkit/
+printf "\nadd_subdirectory(ae400-toolkit)\n" >> $RS2_GIT/tools/CMakeLists.txt
+
 getdevicetimems=$(grep -i '_device->get_device_time_ms()' "$RS2_GIT/src/global_timestamp_reader.cpp")
 if [ "$getdevicetimems" != "" ]; then
 echo "Patch src/global_timestamp_reader.cpp with new hardware time ms representation"
-newhwtimems="duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count()"
+newhwtimems="duration<double, std::milli>(system_clock::now().time_since_epoch()).count()"
 sed -i -e "s/_device->get_device_time_ms()/$newhwtimems/g" $RS2_GIT/src/global_timestamp_reader.cpp
 fi
 

@@ -4,17 +4,20 @@ cmake_minimum_required(VERSION 3.1.0)
 project(LipsAE400Toolkit)
 
 if(WIN32)
-    # windows version is still developing
-    return()
-endif()
-
-add_executable(lips_ae400_toolkit
+add_executable(lips-ae400-toolkit
+    lips_ae400_toolkit.cpp
+    win_scan.h
+    win_scan.cpp
+)
+else()
+add_executable(lips-ae400-toolkit
     lips_ae400_toolkit.cpp
     linux_scan.h
     linux_scan.cpp
 )
+endif()
 
-set_property(TARGET lips_ae400_toolkit PROPERTY CXX_STANDARD 11)
-set_target_properties (lips_ae400_toolkit PROPERTIES FOLDER "Tools")
+set_property(TARGET lips-ae400-toolkit PROPERTY CXX_STANDARD 11)
+set_target_properties (lips-ae400-toolkit PROPERTIES FOLDER "Tools")
 
-install(TARGETS lips_ae400_toolkit RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS lips-ae400-toolkit RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

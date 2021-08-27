@@ -2,6 +2,7 @@
 // Copyright(c) 2017 Intel Corporation. All Rights Reserved.
 
 #include "latency-detector.h"
+#include <iostream>
 
 // This demo is presenting one way to estimate latency without access to special equipment
 // See ReadMe.md for more information

@@ -29,12 +29,12 @@ sudo apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C
 
   * Ubuntu 16:  
   ```
-  sudo add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main" -u
+  sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo xenial main" -u
   ```
 
   * Ubuntu 18:
   ```
-  sudo add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo bionic main" -u
+  sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo bionic main" -u
   ```
 
 5. Install the SDK:

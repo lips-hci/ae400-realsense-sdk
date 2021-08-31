@@ -22,9 +22,9 @@ endif()
 
 # HACK: introduce definition to fix LNK2005:GUID_DEVINTERFACE_USB_DEVICE
 # already defined in wih-helpers.obj error, it conflicts to usb.lib(windows_winusb.obj
-if(WIN32 AND USE_EXTERNAL_USB)
-    target_compile_definitions(pybackend2 PRIVATE WITH_TRACKING=1)
-endif()
+#if(WIN32 AND USE_EXTERNAL_USB)
+#    target_compile_definitions(pybackend2 PRIVATE WITH_TRACKING=1)
+#endif()
 
 target_compile_definitions(pybackend2 PRIVATE ENABLE_AE400_IMU)
 

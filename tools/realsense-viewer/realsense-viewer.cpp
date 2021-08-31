@@ -298,7 +298,7 @@ int main(int argc, const char** argv) try
     std::mutex m;
 
     std::weak_ptr<notifications_model> notifications = viewer_model.not_model;
-     rs2::log_to_callback( RS2_LOG_SEVERITY_INFO,
+    rs2::log_to_callback( RS2_LOG_SEVERITY_INFO,
         [notifications]( rs2_log_severity severity, rs2::log_message const& msg )
         {
             if (auto not_model = notifications.lock())
@@ -608,12 +608,7 @@ int main(int argc, const char** argv) try
             window.height() - viewer_model.get_output_height(),
             window.width() - viewer_model.panel_width, viewer_model.get_output_height() };
 
-        std::vector<rs2::device> devices;
-        for (auto&& dev_model : *device_models)
-        {
-            devices.push_back(dev_model->dev);
-        }
-        viewer_model.not_model->output.draw(window, output_rect, devices);
+        viewer_model.not_model->output.draw(window, output_rect, *device_models);
 
         // Set window position and size
         ImGui::SetNextWindowPos({ 0, viewer_model.panel_y });
@@ -725,7 +720,7 @@ int main(int argc, const char** argv) try
         }
 
     return EXIT_SUCCESS;
-    }
+}
 catch (const error & e)
 {
     std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args() << "):\n    " << e.what() << std::endl;

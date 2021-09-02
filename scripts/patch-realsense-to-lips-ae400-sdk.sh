@@ -35,8 +35,31 @@ if [ -z $1 ]; then
     exit 0
 fi
 
-AE4_GIT=$(pwd)
-RS2_GIT=$1
+CUR_PWD=$(pwd)
+#cd "$CUR_PWD/$(dirname $0)" && SCRIPT_DIR=$(pwd)
+#SCRIPT_DIR=$(pwd)/$(dirname $0)
+SCRIPT_DIR=$(realpath "$CUR_PWD/$(dirname $0)")
+AE4_GIT=$(dirname $SCRIPT_DIR)
+#cd "$CUR_PWD/$1" && RS2_GIT=$(pwd)
+#RS2_GIT=$(CUR_PWD)/$1
+RS2_GIT=$(realpath "$CUR_PWD/$1")
+
+# AE400 SDK path check
+if [ ! -e $AE4_GIT/scripts/patch-realsense-to-lips-ae400-sdk.sh ]; then
+echo ""
+echo "please switch to AE400 SDK directory and run patch script again."
+echo ""
+exit
+fi
+
+# RS source path check
+if [ ! -e $RS2_GIT/src/linux ]; then
+echo ""
+echo "first argument should be valid RealSense SDK directory, please check it."
+echo ""
+exit
+fi
+
 echo ""
 echo "AE400 SRC GIT = $AE4_GIT"
 echo "  RS2 SRC GIT = $RS2_GIT"

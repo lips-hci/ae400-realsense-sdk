@@ -9,6 +9,10 @@ find_package(Threads REQUIRED)
 set(DEPENDENCIES realsense2)
 
 find_package (Python3 COMPONENTS Interpreter Development)
+if (NOT ${BUILD_EASYLOGGINGPP})
+    message(FATAL_ERROR "Unit tests are not supported without BUILD_EASYLOGGINGPP; Check BUILD_EASYLOGGINGPP to run them.")
+endif()
+
 if(Python3_FOUND)
     execute_process(
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/unit-test-config.py ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
@@ -22,8 +26,10 @@ else()
     message(WARNING "Python 3 was not found; Unit tests will be limited!")
 endif()
 
+
 set (unit_tests_sources
     unit-tests-live.cpp
+    unit-tests-regressions.cpp
     unit-tests-post-processing.cpp
     unit-tests-post-processing.h
     unit-tests-main.cpp
@@ -95,6 +101,7 @@ list(APPEND PP_Tests_List  1551257764229 # D415_DS(2)
 # For each post-processing test pattern the following files shall be present
 list(APPEND PP_Test_extensions_List .Input.raw .Input.csv .Output.raw .Output.csv)
 
+
 set_property(GLOBAL PROPERTY sequence_extensions_list)
 function(produce_sequence_extensions source target)
     # Check if metadata file exist, and download if needed
@@ -154,7 +161,9 @@ function(is_file_empty empty filename)
     set(empty ${res} PARENT_SCOPE)
 endfunction()
 
-set(PP_TESTS_URL  https://librealsense.intel.com/rs-tests/post_processing_tests_2018_ww18/)
+
+
+set(PP_TESTS_URL https://librealsense.intel.com/rs-tests/post_processing_tests_2018_ww18/)
 message(STATUS "Preparing to download Post-processing tests dataset...\nRemote server: ${PP_TESTS_URL}\nTarget Location: ${Deployment_Location}\n")
 foreach(i ${PP_Tests_List})
   set(Test_Pattern ${i})
@@ -199,7 +208,7 @@ list(APPEND PP_Rosbag_Recordings_List
     single_depth_color_640x480.bag
     D435i_Depth_and_IMU.bag
 )
- set(PP_Rosbag_Recordings_URL  https://librealsense.intel.com/rs-tests/Rosbag_unit_test_records/)
+ set(PP_Rosbag_Recordings_URL https://librealsense.intel.com/rs-tests/Rosbag_unit_test_records/)
 foreach(i ${PP_Rosbag_Recordings_List})
     set (empty FALSE)
     is_file_empty(empty, ${Deployment_Location}${i} )

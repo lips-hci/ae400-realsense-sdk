@@ -204,6 +204,8 @@ namespace librealsense
     void log_to_console(rs2_log_severity min_severity);
     void log_to_file( rs2_log_severity min_severity, const char* file_path );
     void log_to_callback( rs2_log_severity min_severity, log_callback_ptr callback );
+    void reset_logger();
+    void enable_rolling_log_file( unsigned max_size );
 
 #if BUILD_EASYLOGGINGPP
 
@@ -556,7 +558,9 @@ namespace librealsense
     RS2_ENUM_HELPERS(rs2_calibration_type, CALIBRATION_TYPE)
     RS2_ENUM_HELPERS_CUSTOMIZED(rs2_calibration_status, RS2_CALIBRATION_STATUS_FIRST, RS2_CALIBRATION_STATUS_LAST )
     RS2_ENUM_HELPERS_CUSTOMIZED(rs2_ambient_light, RS2_AMBIENT_LIGHT_NO_AMBIENT, RS2_AMBIENT_LIGHT_LOW_AMBIENT)
+    RS2_ENUM_HELPERS_CUSTOMIZED(rs2_digital_gain, RS2_DIGITAL_GAIN_HIGH, RS2_DIGITAL_GAIN_LOW)
     RS2_ENUM_HELPERS(rs2_cah_trigger, CAH_TRIGGER)
+    RS2_ENUM_HELPERS(rs2_host_perf_mode, HOST_PERF)
 
 
     ////////////////////////////////////////////
@@ -1777,7 +1781,6 @@ namespace librealsense
         bool _valid;
         T _value;
     };
-
 }
 
 inline std::ostream& operator<<( std::ostream& out, rs2_extrinsics const & e )

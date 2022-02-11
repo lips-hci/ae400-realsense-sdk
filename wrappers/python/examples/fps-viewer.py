@@ -6,6 +6,10 @@
 ###############################################
 
 """
+LIPS Corporation
+
+Author: Tim Cheng (timcheng@lips-hci.com)
+
 This sample is a simple OpenCV viewer showing frame-rate number.
 
 Keyboard:
@@ -48,8 +52,12 @@ start = time.time()
 # Default write-to-csv feature is OFF
 savetocsv = False
 csvfilename = "fps_results_%dx%d.csv" %(w, h)
-print("save to :"csvfilename)
-sys.exit(0)
+print("Help:")
+print("- Press 'o' to export fps number to .csv file")
+savetopath = "  (default save to file: %s)" %(csvfilename)
+print(savetopath)
+print("- Press 'q' or Esc to exit the program")
+
 try:
     while True:
 
@@ -77,10 +85,10 @@ try:
         dt = now - start
         if (dt) > x :
             cv2.setWindowTitle(WIN_NAME, "RealSense (%dx%d) %.2f FPS (%.2fms)" %(w, h, counter/dt, (dt*1000)/counter))
-            if savetocsv
+            if savetocsv:
                 with open('./fps_results.csv', 'w', newline='') as csvfile:
                     writer = csv.writer(csvfile, delimiter=',')
-                    writer.writerow([now, counter/dt, (dt*1000)/counter)])
+                    writer.writerow([now, counter/dt, ((dt*1000)/counter)])
             start = time.time()
             counter = 0
 
@@ -94,13 +102,15 @@ try:
                 writer = csv.writer(csvfile, delimiter=',')
                 writer.writerow(['timestamp', 'fps', 'ms'])
             savetocsv = True
-            print "Start writing data to ", csvfile.name, "..."
+            text = "Start writing data to %s ..." %(csvfile.name)
+            print(text)
 
         if key in (27, ord("q")) or cv2.getWindowProperty(WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:
-            if savetocsv
-                print "Stop writing file ", csvfile.name, "..."
+            if savetocsv:
+                text = "Stop writing file %s ..." %(csvfile.name)
+                print(text)
                 csvfile.close()
-                printf "Done"
+                print("Done")
             break
 
 finally:

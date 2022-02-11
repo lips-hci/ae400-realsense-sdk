@@ -2059,6 +2059,7 @@ class Frame {
       case constants.format.FORMAT_MOTION_RAW:
       case constants.format.FORMAT_GPIO_RAW:
       case constants.format.FORMAT_RAW10:
+      case constants.format.FORMAT_FG:
       case constants.format.FORMAT_ANY:
         this.typedArray = new Uint8Array(this.arrayBuffer);
         return this.typedArray;
@@ -3967,6 +3968,11 @@ const format = {
    */
   format_w10: 'w10',
   /**
+  * String literal of <code>'FG'</code>.
+  * <br>16-bit per-pixel frame grabber format.
+  */
+  format_FG: 'FG',
+  /**
    * When passed to enable stream, librealsense will try to provide best suited
    * format. <br>Equivalent to its lowercase counterpart.
    * @type {Integer}
@@ -4111,6 +4117,11 @@ const format = {
    * @type {Integer}
    */
   FORMAT_W10: RS2.RS2_FORMAT_W10,
+   /**
+  * 16-bit per-pixel frame grabber format.
+  * @type {Integer}
+  */
+  FORMAT_FG: RS2.RS2_FORMAT_FG,
   /**
    * Number of enumeration values. Not a valid input: intended to be used in for-loops.
    * <br>Equivalent to its lowercase counterpart.
@@ -4180,6 +4191,8 @@ const format = {
 		return this.format_invi;
 	  case this.RS2_FORMAT_W10:
 		return this.format_w10;
+      case this.RS2_FORMAT_FG:
+        return this.format_FG;
     }
   },
 };
@@ -4643,8 +4656,8 @@ const option = {
   option_stream_format_filter: 'stream-format-filter',
   option_stream_index_filter: 'stream-index-filter',
   option_emitter_on_off: 'emitter-on-off',
-  option_zero_order_point_x: 'zero-order-point-x',
-  option_zero_order_point_y: 'zero-order-point-y',
+  option_zero_order_point_x: 'zero-order-point-x', /* Deprecated */
+  option_zero_order_point_y: 'zero-order-point-y', /* Deprecated */
   option_lld_temperature: 'lld-temperature',
   option_mc_temperature: 'mc-temperature',
   option_ma_temperature: 'ma-temperature',
@@ -4657,7 +4670,7 @@ const option = {
   option_enable_dynamic_calibration: 'enable-dynamic-calibration',
   option_depth_offset: 'depth-offset',
   option_led_power: 'led-power',
-  option_zero_order_enabled: 'zero-order-enabled',
+  option_zero_order_enabled: 'zero-order-enabled', /* Deprecated */
   option_enable_map_preservation: 'enable-map-preservation',
   /**
    * Enable / disable color backlight compensatio.<br>Equivalent to its lowercase counterpart.
@@ -4926,6 +4939,7 @@ const option = {
   OPTION_ZERO_ORDER_ENABLED: RS2.RS2_OPTION_ZERO_ORDER_ENABLED,
   OPTION_ENABLE_MAP_PRESERVATION: RS2.RS2_OPTION_ENABLE_MAP_PRESERVATION,
   OPTION_FREEFALL_DETECTION_ENABLED: RS2.RS2_OPTION_FREEFALL_DETECTION_ENABLED,
+  OPTION_DIGITAL_GAIN: RS2.RS2_OPTION_DIGITAL_GAIN,
   /**
    * Enable Laser On constantly (GS SKU Only)
    * <br>Equivalent to its lowercase counterpart
@@ -4933,6 +4947,28 @@ const option = {
    */
   OPTION_EMITTER_ALWAYS_ON: RS2.RS2_OPTION_EMITTER_ALWAYS_ON,
   OPTION_THERMAL_COMPENSATION: RS2.RS2_OPTION_THERMAL_COMPENSATION,
+  OPTION_TRIGGER_CAMERA_ACCURACY_HEALTH: RS2.RS2_OPTION_TRIGGER_CAMERA_ACCURACY_HEALTH,
+  OPTION_RESET_CAMERA_ACCURACY_HEALTH: RS2.RS2_OPTION_RESET_CAMERA_ACCURACY_HEALTH,
+  OPTION_HOST_PERFORMANCE: RS2.RS2_OPTION_HOST_PERFORMANCE,
+  OPTION_HDR_ENABLED: RS2.RS2_OPTION_HDR_ENABLED,
+  OPTION_SEQUENCE_NAME: RS2.RS2_OPTION_SEQUENCE_NAME,
+  OPTION_SEQUENCE_SIZE: RS2.RS2_OPTION_SEQUENCE_SIZE,
+  OPTION_SEQUENCE_ID: RS2.RS2_OPTION_SEQUENCE_ID,
+  OPTION_HUMIDITY_TEMPERATURE: RS2.RS2_OPTION_HUMIDITY_TEMPERATURE,
+  OPTION_ENABLE_MAX_USABLE_RANGE: RS2.RS2_OPTION_ENABLE_MAX_USABLE_RANGE,
+  OPTION_ALTERNATE_IR: RS2.RS2_OPTION_ALTERNATE_IR,
+  OPTION_NOISE_ESTIMATION: RS2.RS2_OPTION_NOISE_ESTIMATION,
+  OPTION_ENABLE_IR_REFLECTIVITY: RS2.RS2_OPTION_ENABLE_IR_REFLECTIVITY,
+  /**
+   * Set or get auto exposure limit in microsecond.
+   * @type {Integer}
+   */
+  OPTION_AUTO_EXPOSURE_LIMIT: RS2.RS2_OPTION_AUTO_EXPOSURE_LIMIT,
+  /**
+   * Set or get auto gain limit.
+   * @type {Integer}
+   */
+  OPTION_AUTO_GAIN_LIMIT: RS2.RS2_OPTION_AUTO_GAIN_LIMIT,
   /**
    * Number of enumeration values. Not a valid input: intended to be used in for-loops.
    * @type {Integer}
@@ -5077,10 +5113,22 @@ const option = {
         return this.option_enable_map_preservation;
       case this.OPTION_FREEFALL_DETECTION_ENABLED:
         return this.option_freefall_detection_enabled;
+      case this.OPTION_DIGITAL_GAIN:
+        return this.option_digital_gain;
       case this.OPTION_EMITTER_ALWAYS_ON:
         return this.option_emitter_always_on;
       case this.OPTION_THERMAL_COMPENSATION:
         return this.option_thermal_compensation;
+      case this.OPTION_HUMIDITY_TEMPERATURE:
+        return this.option_humidity_temperature;
+      case this.OPTION_ENABLE_MAX_USABLE_RANGE:
+        return this.option_enable_max_usable_range;
+      case this.OPTION_ALTERNATE_IR:
+        return this.option_alternate_ir;
+      case this.OPTION_NOISE_ESTIMATION:
+        return this.option_noise_estimation;
+      case this.ENABLE_IR_REFLECTIVITY:
+        return this.option_enable_ir_reflectivity;
       default:
         throw new TypeError(
             'option.optionToString(option) expects a valid value as the 1st argument');

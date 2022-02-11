@@ -8,7 +8,7 @@
 
 int main( int argc, char *argv[] )
 {
-    printf( "Scanning your network to find AE400 ...\n(this will take 20~30 secs)\n\n" );
+    printf( "Scanning your network to find AE400 ...\n(this may take around 30 secs, please wait)\n\n" );
     show_AE400_info();
     return 0;
 }

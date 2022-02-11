@@ -106,9 +106,11 @@ inline std::vector<profile>  configure_all_supported_streams(rs2::sensor& sensor
         { RS2_STREAM_COLOR,     RS2_FORMAT_RGB8,          width, height,    0, fps},
         { RS2_STREAM_INFRARED,  RS2_FORMAT_Y8,            width, height,    1, fps},
         { RS2_STREAM_INFRARED,  RS2_FORMAT_Y8,            width, height,    2, fps},
+        { RS2_STREAM_INFRARED,  RS2_FORMAT_Y8,            width, height,    0, fps},
+        { RS2_STREAM_CONFIDENCE,RS2_FORMAT_RAW8,          width, height,    0, fps},
         { RS2_STREAM_FISHEYE,   RS2_FORMAT_RAW8,          width, height,    0, fps},
+        { RS2_STREAM_ACCEL,     RS2_FORMAT_MOTION_XYZ32F,   1,      1,      0, 200},
         { RS2_STREAM_GYRO,      RS2_FORMAT_MOTION_XYZ32F,   1,      1,      0, 200},
-        { RS2_STREAM_ACCEL,     RS2_FORMAT_MOTION_XYZ32F,   1,      1,      0, 250}
     };
 
     std::vector<profile> profiles;
@@ -136,7 +138,7 @@ inline std::vector<profile>  configure_all_supported_streams(rs2::sensor& sensor
                 {
                     if (auto  motion = p.as<rs2::motion_stream_profile>())
                     {
-                        if (p.fps() == profile.fps &&
+                        if (((profile.fps / (p.fps()+1)) <= 2.f)  && // Approximate IMU rates. No need for being exact
                             p.stream_index() == profile.index &&
                             p.stream_type() == profile.stream &&
                             p.format() == profile.format)
@@ -215,6 +217,8 @@ inline void disable_sensitive_options_for(rs2::sensor& sen)
     {
         rs2::option_range range;
         REQUIRE_NOTHROW(range = sen.get_option_range(RS2_OPTION_EXPOSURE)); // TODO: fails sometimes with "Element Not Found!"
+        //float val = (range.min + (range.def-range.min)/10.f); // TODO - generate new records using the modified exposure
+
         REQUIRE_NOTHROW(sen.set_option(RS2_OPTION_EXPOSURE, range.def));
     }
 }
@@ -795,6 +799,67 @@ inline rs2::stream_profile get_profile_by_resolution_type(rs2::sensor& s, res_ty
     std::stringstream ss;
     ss << "stream profile for " << width << "," << height << " resolution is not supported!";
     throw std::runtime_error(ss.str());
+}
+
+inline std::shared_ptr<rs2::device> do_with_waiting_for_camera_connection(rs2::context ctx, std::shared_ptr<rs2::device> dev, std::string serial, std::function<void()> operation)
+{
+    std::mutex m;
+    bool disconnected = false;
+    bool connected = false;
+    std::shared_ptr<rs2::device> result;
+    std::condition_variable cv;
+
+    ctx.set_devices_changed_callback([&result, dev, &disconnected, &connected, &m, &cv, &serial](rs2::event_information info) mutable
+        {
+            if (info.was_removed(*dev))
+            {
+                std::unique_lock<std::mutex> lock(m);
+                disconnected = true;
+                cv.notify_all();
+            }
+            auto list = info.get_new_devices();
+            if (list.size() > 0)
+            {
+                for (auto cam : list)
+                {
+                    if (serial == cam.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER))
+                    {
+                        std::unique_lock<std::mutex> lock(m);
+                        connected = true;
+                        result = std::make_shared<rs2::device>(cam);
+
+                        disable_sensitive_options_for(*result);
+                        cv.notify_all();
+                        break;
+                    }
+                }
+            }
+        });
+
+    operation();
+
+    std::unique_lock<std::mutex> lock(m);
+    REQUIRE(wait_for_reset([&]() {
+        return cv.wait_for(lock, std::chrono::seconds(20), [&]() { return disconnected; });
+        }, dev));
+    REQUIRE(cv.wait_for(lock, std::chrono::seconds(20), [&]() { return connected; }));
+    REQUIRE(result);
+    return result;
+}
+
+inline rs2::depth_sensor restart_first_device_and_return_depth_sensor(const rs2::context& ctx, const rs2::device_list& devices_list)
+{
+    rs2::device dev = devices_list[0];
+    std::string serial;
+    REQUIRE_NOTHROW(serial = dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
+    //forcing hardware reset to simulate device disconnection
+    auto shared_dev = std::make_shared<rs2::device>(devices_list.front());
+    shared_dev = do_with_waiting_for_camera_connection(ctx, shared_dev, serial, [&]()
+        {
+            shared_dev->hardware_reset();
+        });
+    rs2::depth_sensor depth_sensor = dev.query_sensors().front();
+    return depth_sensor;
 }
 
 

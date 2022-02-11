@@ -27,12 +27,10 @@ else()
     string(STRIP ${TARGET_ARCH} TARGET_ARCH)
 endif()
 
-if(${REALSENSE_VERSION_STRING} VERSION_LESS 2.38)
-    message(FATAL_ERROR "AE400 SDK requires RealSense SDK codebase v2.38 or later version")
-elseif(${REALSENSE_VERSION_STRING} VERSION_GREATER 2.42)
-    set(LIBVERSION 1.0.1.5)
+if(${REALSENSE_VERSION_STRING} VERSION_LESS 2.43)
+    message(FATAL_ERROR "AE400 SDK requires RealSense SDK codebase v2.43 or later version")
 else()
-    set(LIBVERSION 1.0.0.5)
+    set(LIBVERSION 1.0.2.0)
 endif()
 
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
@@ -52,7 +50,7 @@ find_library(LIB_BACKEND_ETHERNET_DEBUG
 )
 
 if(${LIB_BACKEND_ETHERNET} STREQUAL "LIB_BACKEND_ETHERNET-NOTFOUND")
-    message(FATAL_ERROR "backend-ethernet library not found! Please check github.com/lips-hci")
+    message(FATAL_ERROR "[LIPS PATCH] backend-ethernet library not found! Please check github.com/lips-hci")
 else()
     if(NOT TARGET backend-ethernet)
         add_library(backend-ethernet STATIC IMPORTED)
@@ -64,7 +62,7 @@ else()
         IMPORTED_LOCATION_RELWITHDEBINFO ${LIB_BACKEND_ETHERNET}
         IMPORTED_LOCATION_DEBUG ${LIB_BACKEND_ETHERNET_DEBUG}
     )
-    message(STATUS "Found backend-ethernet library: ${LIB_BACKEND_ETHERNET}")
+    message(STATUS "[LIPS PATCH] Found backend-ethernet library: ${LIB_BACKEND_ETHERNET}")
     target_link_libraries(${LRS_TARGET} PRIVATE backend-ethernet udev)
     mark_as_advanced(LIB_BACKEND_ETHERNET LIB_BACKEND_ETHERNET_DEBUG)
 endif()
@@ -77,11 +75,11 @@ if(USE_EXTERNAL_USB)
 endif()
 
 if(${REALSENSE_VERSION_STRING} VERSION_LESS 2.34)
-message(STATUS "Disable global time by patching source timestamp_reader")
+message(STATUS "[LIPS PATCH] Disable global time by patching source timestamp_reader")
 # Manually patch src/global_timestamp_reader.cpp: get_device_time_ms() to redefine hardware time ms
 # get_device_time_ms() since v2.23
 else()
-message(STATUS "Disable global time by defining RASPBERRY_PI")
+message(STATUS "[LIPS PATCH] Disable global time by defining RASPBERRY_PI")
 # Refer this commit to DISABLE global time reading (ds5_device::get_device_time_ms)
 # depth streaming is easily stuck (when AE is on) due to device time reading on
 # network transition, it can cause lot of fps performance impact.

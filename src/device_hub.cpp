@@ -76,7 +76,7 @@ namespace librealsense
     std::shared_ptr<device_interface> device_hub::create_device(const std::string& serial, bool cycle_devices)
     {
         std::shared_ptr<device_interface> res = nullptr;
-        for(auto i = 0; ((i< _device_list.size()) && (nullptr == res)); i++)
+        for(size_t i = 0; ((i< _device_list.size()) && (nullptr == res)); i++)
         {
             // _camera_index is the curr device that the hub will expose
             auto d = _device_list[ (_camera_index + i) % _device_list.size()];
@@ -98,10 +98,10 @@ namespace librealsense
                 {
                     res = dev;
                 }
-            } 
+            }
             catch (const std::exception& ex)
             {
-                LOG(WARNING) << "Could not open device " << ex.what();
+                LOG_WARNING("Could not open device " << ex.what());
             }
         }
 

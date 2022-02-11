@@ -265,7 +265,7 @@ namespace librealsense
             _coefs.update_last_sample_time(crnt_hw_time);
             return _coefs.calc_value(crnt_hw_time);
         }
-        else        
+        else
             return crnt_hw_time;
     }
 

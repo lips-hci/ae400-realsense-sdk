@@ -21,6 +21,8 @@
 
 #define ARCBALL_CAMERA_IMPLEMENTATION
 #include <arcball_camera.h>
+#include "../common/utilities/string/trim-newlines.h"
+#include "../common/utilities/imgui/wrap.h"
 
 namespace rs2
 {
@@ -860,6 +862,19 @@ namespace rs2
 #endif
     }
 
+    // Hide options from both the DQT and Viewer applications
+    void viewer_model::hide_common_options()
+    {
+        _hidden_options.emplace(RS2_OPTION_STREAM_FILTER);
+        _hidden_options.emplace(RS2_OPTION_STREAM_FORMAT_FILTER);
+        _hidden_options.emplace(RS2_OPTION_STREAM_INDEX_FILTER);
+        _hidden_options.emplace(RS2_OPTION_FRAMES_QUEUE_SIZE);
+        _hidden_options.emplace(RS2_OPTION_SENSOR_MODE);
+        _hidden_options.emplace(RS2_OPTION_TRIGGER_CAMERA_ACCURACY_HEALTH);
+        _hidden_options.emplace(RS2_OPTION_RESET_CAMERA_ACCURACY_HEALTH);
+        _hidden_options.emplace(RS2_OPTION_NOISE_ESTIMATION);
+    }
+
     void viewer_model::update_configuration()
     {
         rs2_error* e = nullptr;
@@ -898,7 +913,7 @@ namespace rs2
             configurations::performance::occlusion_invalidation, true);
 
         ground_truth_r = config_file::instance().get_or_default(
-            configurations::viewer::ground_truth_r, 2500);
+            configurations::viewer::ground_truth_r, 1200);
 
         selected_shader = (shader_type)config_file::instance().get_or_default(
             configurations::viewer::shading_mode, 2);
@@ -926,12 +941,14 @@ namespace rs2
 
   
 
-    viewer_model::viewer_model(context &ctx_)
-            : ppf(*this),
-              ctx(ctx_),
-              frameset_alloc(this),
-              synchronization_enable(true),
-              zo_sensors(0)
+    viewer_model::viewer_model( context & ctx_ )
+        : ppf( *this )
+        , ctx( ctx_ )
+        , frameset_alloc( this )
+        , synchronization_enable( true )
+        , synchronization_enable_prev_state(true)
+        , zo_sensors( 0 )
+        , _support_ir_reflectivity( false )
     {
 
         syncer = std::make_shared<syncer_model>();
@@ -945,6 +962,8 @@ namespace rs2
         check_permissions();
         export_model exp_model = export_model::make_exporter("PLY", ".ply", "Polygon File Format (PLY)\0*.ply\0");
         exporters.insert(std::pair<export_type, export_model>(export_type::ply, exp_model));
+
+        hide_common_options(); // hide this options from both Viewer and DQT applications
     }
 
     void viewer_model::gc_streams()
@@ -965,9 +984,16 @@ namespace rs2
         }
         for (auto&& i : streams_to_remove) {
             if(selected_depth_source_uid == i)
+            {
+                last_points = points();
                 selected_depth_source_uid = -1;
-            if(selected_tex_source_uid == i)
+            }
+
+            if (selected_tex_source_uid == i)
+            {
+                last_texture.reset();
                 selected_tex_source_uid = -1;
+            }
             streams.erase(i);
 
             if(ppf.frames_queue.find(i) != ppf.frames_queue.end())
@@ -975,6 +1001,11 @@ namespace rs2
                 ppf.frames_queue.erase(i);
             }
         }
+    }
+
+    bool rs2::viewer_model::is_option_skipped(rs2_option opt) const
+    {
+        return (_hidden_options.find(opt) != _hidden_options.end());
     }
 
     void rs2::viewer_model::show_popup(const ux_window& window, const popup& p)
@@ -1040,9 +1071,24 @@ namespace rs2
         auto custom_command = [&]()
         {
             auto msg = _active_popups.front().message;
+
+            // Wrap the text to feet the error pop-up window
+            std::string wrapped_msg;
+            try
+            {
+                auto trimmed_msg = utilities::string::trim_newlines(msg);  
+                wrapped_msg = utilities::imgui::wrap(trimmed_msg, 500);
+            }
+            catch (...)
+            {
+                wrapped_msg = msg; // Revert to original text on wrapping failure
+                not_model->output.add_log(RS2_LOG_SEVERITY_WARN, __FILE__, __LINE__,
+                    to_string() << "Wrapping of error message text failed!");
+            }
+
             ImGui::Text("RealSense error calling:");
             ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, regular_blue);
-            ImGui::InputTextMultiline("##error", const_cast<char*>(msg.c_str()),
+            ImGui::InputTextMultiline("##error", const_cast<char*>(wrapped_msg.c_str()),
                 msg.size() + 1, { 500,95 }, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_ReadOnly);
             ImGui::PopStyleColor();
 
@@ -1147,7 +1193,7 @@ namespace rs2
 
     void viewer_model::show_rendering_not_supported(ImFont* font_18, int min_x, int min_y, int max_x, int max_y, rs2_format format)
     {
-        static periodic_timer update_string(std::chrono::milliseconds(200));
+        static utilities::time::periodic_timer update_string(std::chrono::milliseconds(200));
         static int counter = 0;
         static std::string to_print;
         auto pos = ImGui::GetCursorScreenPos();
@@ -1283,6 +1329,7 @@ namespace rs2
         std::shared_ptr<texture_buffer> texture_frame = nullptr;
         points p;
         frame f{};
+        gc_streams();
 
         std::map<int, frame> last_frames;
         try
@@ -1290,7 +1337,9 @@ namespace rs2
             size_t index = 0;
             while (ppf.resulting_queue.poll_for_frame(&f) && ++index < ppf.resulting_queue_max_size)
             {
-                last_frames[f.get_profile().unique_id()] = f;
+                if (streams.find(f.get_profile().unique_id()) != streams.end() ||
+                    streams.find(streams_origin[f.get_profile().unique_id()]) != streams.end())
+                    last_frames[f.get_profile().unique_id()] = f;
             }
 
             for(auto&& f : last_frames)
@@ -1344,7 +1393,7 @@ namespace rs2
         }
 
 
-        gc_streams();
+        
 
         window.begin_viewport();
 
@@ -1363,7 +1412,7 @@ namespace rs2
 
         draw_viewport(viewer_rect, window, devices, error_message, texture_frame, p);
 
-        not_model->draw(window, 
+        modal_notification_on = not_model->draw(window,
             static_cast<int>(window.width()), static_cast<int>(window.height()),
             error_message);
 
@@ -1574,7 +1623,7 @@ namespace rs2
         float inverse = 1.f / distances.size();
         for (auto elem : distances)
         {
-            e += pow(elem - mean, 2);
+            e += static_cast<float>(pow(elem - mean, 2));
         }
 
         auto standard_deviation = sqrt(inverse * e);
@@ -1587,7 +1636,7 @@ namespace rs2
         ImFont *font1, ImFont *font2, size_t dev_model_num,
         const mouse_info &mouse, std::string& error_message)
     {
-        static periodic_timer every_sec(std::chrono::seconds(1));
+        static utilities::time::periodic_timer every_sec(std::chrono::seconds(1));
         static bool icon_visible = false;
         if (every_sec) icon_visible = !icon_visible;
         float alpha = icon_visible ? 1.f : 0.2f;
@@ -1603,7 +1652,6 @@ namespace rs2
         {
             show_no_stream_overlay(font2, static_cast<int>(view_rect.x), static_cast<int>(view_rect.y), static_cast<int>(win.width()), static_cast<int>(win.height() - output_height));
         }
-
         for (auto &&kvp : layout)
         {
             auto&& view_rect = kvp.second;
@@ -1630,7 +1678,8 @@ namespace rs2
             }
 
             stream_mv.show_stream_header(font1, stream_rect, *this);
-            stream_mv.show_stream_footer(font1, stream_rect, mouse, *this);
+            stream_mv.show_stream_footer(font1, stream_rect, mouse, streams, *this);
+            
 
             if (val_in_range(stream_mv.profile.format(), { RS2_FORMAT_RAW10 , RS2_FORMAT_RAW16, RS2_FORMAT_MJPEG }))
             {
@@ -2798,6 +2847,11 @@ namespace rs2
                     {
                         official_url = false;
                     }
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("%s", "Add file:// prefix to use a local DB file ");
+                    }
+
                     if (!official_url)
                     {
                         if (ImGui::InputText("##custom_server_url", custom_url, 255))
@@ -3136,15 +3190,15 @@ namespace rs2
     {
         // Starting post processing filter rendering thread
         ppf.start();
-        streams[p.unique_id()].begin_stream(d, p);
+        streams[p.unique_id()].begin_stream(d, p, *this);
         ppf.frames_queue.emplace(p.unique_id(), rs2::frame_queue(5));
     }
 
-    bool viewer_model::is_3d_texture_source(frame f)
+    bool viewer_model::is_3d_texture_source(frame f) const
     {
         auto profile = f.get_profile().as<video_stream_profile>();
         auto index = profile.unique_id();
-        auto mapped_index = streams_origin[index];
+        auto mapped_index = streams_origin.at(index);
 
         if (!is_rasterizeable(profile.format()))
             return false;
@@ -3226,7 +3280,8 @@ namespace rs2
         ux_window& window, int devices, std::string& error_message, 
         std::shared_ptr<texture_buffer> texture, points points)
     {
-        updates->draw(*this, window, error_message);
+        if (!modal_notification_on)
+            updates->draw(*this, window, error_message);
 
         static bool first = true;
         if (first)

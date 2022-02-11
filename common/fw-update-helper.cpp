@@ -29,7 +29,7 @@ const char* fw_get_L5XX_FW_Image(int) { return NULL; }
 
 #endif // INTERNAL_FW
 
-constexpr const char* recommended_fw_url = "https://dev.intelrealsense.com/docs/firmware-releases";
+constexpr const char* recommended_fw_url = "https://dev.intelrealsense.com/docs/firmware-updates";
 
 namespace rs2
 {
@@ -194,22 +194,38 @@ namespace rs2
         {
             log("Backing-up camera flash memory");
 
-            auto flash = upd.create_flash_backup([&](const float progress)
+            std::string log_backup_status;
+            try
             {
-                _progress = int((ceil(progress * 5) / 5) * (30 - next_progress)) + next_progress;
-            });
+                auto flash = upd.create_flash_backup([&](const float progress)
+                {
+                    _progress = int((ceil(progress * 5) / 5) * (30 - next_progress)) + next_progress;
+                });
 
-            auto temp = get_folder_path(special_folder::app_data);
-            temp += serial + "." + get_timestamped_file_name() + ".bin";
+                auto temp = get_folder_path(special_folder::app_data);
+                temp += serial + "." + get_timestamped_file_name() + ".bin";
 
+                {
+                    std::ofstream file(temp.c_str(), std::ios::binary);
+                    file.write((const char*)flash.data(), flash.size());
+                    log_backup_status = "Backup completed and saved as '"  + temp + "'";
+                }
+            }
+            catch (const std::exception& e)
             {
-                std::ofstream file(temp.c_str(), std::ios::binary);
-                file.write((const char*)flash.data(), flash.size());
+                log_backup_status = "WARNING: backup failed; continuing without it...";
+                _viewer.not_model->output.add_log(RS2_LOG_SEVERITY_WARN,
+                    __FILE__,
+                    __LINE__,
+                    log_backup_status + ", Error: " + e.what());
+            }
+            catch ( ... )
+            {
+                log_backup_status = "WARNING: backup failed; continuing without it...";
+                _viewer.not_model->add_log(log_backup_status + ", Unknown error occurred");
             }
 
-            std::string log_line = "Backup completed and saved as '";
-            log_line += temp + "'";
-            log(log_line);
+            log(log_backup_status);
 
             next_progress = 40;
 
@@ -217,6 +233,8 @@ namespace rs2
             {
                 log("Requesting to switch to recovery mode");
                 upd.enter_update_state();
+                // Allow time for the device to disconnect before calling "query_devices"
+                std::this_thread::sleep_for(std::chrono::seconds(2));
 
                 if (!check_for([this, serial, &dfu]() {
                     auto devs = _ctx.query_devices();
@@ -239,9 +257,10 @@ namespace rs2
                             }
                         }
                         catch (std::exception &e) {
-                            std::stringstream s;
-                            s << "Exception caught in FW Update process-flow: " << e.what();
-                            log(s.str().c_str());
+                            _viewer.not_model->output.add_log( RS2_LOG_SEVERITY_WARN,
+                                __FILE__,
+                                __LINE__,
+                                to_string() << "Exception caught in FW Update process-flow: " << e.what() << "; Retrying..." );
                         }
                         catch (...) {}
                     }

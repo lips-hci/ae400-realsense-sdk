@@ -20,14 +20,16 @@
 #include "ds5-active.h"
 #include "ds5-color.h"
 #include "ds5-motion.h"
+#include "ds5-thermal-monitor.h"
 #include "sync.h"
 
 #include "../firmware_logger_device.h"
+#include "device-calibration.h"
 
 namespace librealsense
 {
     // PSR
-    class rs400_device : public ds5_nonmonochrome, 
+    class rs400_device : public ds5_nonmonochrome,
         public ds5_advanced_mode_base,
         public firmware_logger_device
     {
@@ -118,7 +120,7 @@ namespace librealsense
 
     // ASR (D460)
     class rs410_device : public ds5_nonmonochrome,
-                         public ds5_active, 
+                         public ds5_active,
                          public ds5_advanced_mode_base,
                          public firmware_logger_device
     {
@@ -198,7 +200,7 @@ namespace librealsense
     };
 
     class rs416_device : public ds5_nonmonochrome,
-        public ds5_active, 
+        public ds5_active,
         public ds5_advanced_mode_base,
         public firmware_logger_device
     {
@@ -306,7 +308,7 @@ namespace librealsense
     };
 
     // PWGT
-    class rs420_mm_device : public ds5_motion, 
+    class rs420_mm_device : public ds5_motion,
                             public ds5_advanced_mode_base,
                             public firmware_logger_device
     {
@@ -346,6 +348,7 @@ namespace librealsense
                 tags.push_back({ RS2_STREAM_FISHEYE, -1, 640, 480, RS2_FORMAT_RAW8, 30, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT});
                 tags.push_back({RS2_STREAM_GYRO, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_200, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
                 tags.push_back({RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_63, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
+                tags.push_back({RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_100, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             }
 
             return tags;
@@ -353,7 +356,7 @@ namespace librealsense
     };
 
     // PWG
-    class rs420_device : public ds5_device, 
+    class rs420_device : public ds5_device,
                          public ds5_advanced_mode_base,
                          public firmware_logger_device
     {
@@ -391,7 +394,7 @@ namespace librealsense
     };
 
     // AWG
-    class rs430_device : public ds5_active, 
+    class rs430_device : public ds5_active,
                          public ds5_advanced_mode_base,
                          public firmware_logger_device
     {
@@ -429,8 +432,8 @@ namespace librealsense
         };
     };
 
-    class rs430i_device : public ds5_active, 
-                          public ds5_advanced_mode_base, 
+    class rs430i_device : public ds5_active,
+                          public ds5_advanced_mode_base,
                           public ds5_motion,
                           public firmware_logger_device
     {
@@ -445,7 +448,7 @@ namespace librealsense
               ds5_motion(ctx, group),
               firmware_logger_device(ctx, group, ds5_device::_hw_monitor,
                 get_firmware_logs_command(),
-                get_flash_logs_command()) 
+                get_flash_logs_command())
         {}
 
         std::vector<tagged_profile> get_profiles_tags() const override
@@ -466,6 +469,7 @@ namespace librealsense
             }
             tags.push_back({ RS2_STREAM_GYRO, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_200, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             tags.push_back({ RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_63, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
+            tags.push_back({ RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_100, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
 
             return tags;
         };
@@ -516,6 +520,7 @@ namespace librealsense
             {
                 tags.push_back({RS2_STREAM_GYRO, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_200, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
                 tags.push_back({RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_63, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
+                tags.push_back({RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_100, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             }
 
             return tags;
@@ -536,7 +541,7 @@ namespace librealsense
               ds5_device(ctx, group),
               ds5_active(ctx, group),
               ds5_color(ctx,  group),
-              ds5_advanced_mode_base(ds5_device::_hw_monitor, get_depth_sensor()), 
+              ds5_advanced_mode_base(ds5_device::_hw_monitor, get_depth_sensor()),
               firmware_logger_device(ctx, group, ds5_device::_hw_monitor,
                 get_firmware_logs_command(),
                 get_flash_logs_command()) {}
@@ -625,7 +630,7 @@ namespace librealsense
               ds5_advanced_mode_base(ds5_device::_hw_monitor, get_depth_sensor()),
               firmware_logger_device(ctx, group, ds5_device::_hw_monitor,
                 get_firmware_logs_command(),
-                get_flash_logs_command()) 
+                get_flash_logs_command())
         {
             check_and_restore_rgb_stream_extrinsic();
         }
@@ -638,18 +643,18 @@ namespace librealsense
             auto usb_spec = get_usb_spec();
             bool usb3mode = (usb_spec >= platform::usb3_type || usb_spec == platform::usb_undefined);
 
-            uint32_t depth_width  = usb3mode ?      848 : 640;
-            uint32_t depth_height = usb3mode ?      480 : 480;
-            uint32_t color_width = usb3mode ?       1280 : 640;
-            uint32_t color_height = usb3mode ?      720 : 480;
-            uint32_t fps    = usb3mode ?            30 :  15;
+            int depth_width  = usb3mode ?      848 : 640;
+            int depth_height = usb3mode ?      480 : 480;
+            int color_width = usb3mode ?       1280 : 640;
+            int color_height = usb3mode ?      720 : 480;
+            int fps    = usb3mode ?            30 :  15;
 
             tags.push_back({ RS2_STREAM_COLOR, -1, color_width, color_height, RS2_FORMAT_RGB8, fps, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             tags.push_back({ RS2_STREAM_DEPTH, -1, depth_width, depth_height, RS2_FORMAT_Z16, fps, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             tags.push_back({ RS2_STREAM_INFRARED, -1, depth_width, depth_height, RS2_FORMAT_Y8, fps, profile_tag::PROFILE_TAG_SUPERSET });
             tags.push_back({RS2_STREAM_GYRO, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_200, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             tags.push_back({RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_63, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
-
+            tags.push_back({RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_100, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             return tags;
         };
         bool compress_while_record() const override { return false; }
@@ -698,7 +703,7 @@ namespace librealsense
                             LOG_WARNING("RGB extrinsic - translation is corrupted: " << trans_vector);
                             return false;
                         }
-                        // Translation must be assigned for at least one axis 
+                        // Translation must be assigned for at least one axis
                         if (std::fabs(trans_vector[i]) > std::numeric_limits<float>::epsilon())
                             found = true;
                     }
@@ -855,9 +860,9 @@ namespace librealsense
             auto usb_spec = get_usb_spec();
             bool usb3mode = (usb_spec >= platform::usb3_type || usb_spec == platform::usb_undefined);
 
-            uint32_t width = usb3mode ? 1280 : 640;
-            uint32_t height = usb3mode ? 720 : 480;
-            uint32_t fps = usb3mode ? 30 : 15;
+            int width = usb3mode ? 1280 : 640;
+            int height = usb3mode ? 720 : 480;
+            int fps = usb3mode ? 30 : 15;
 
             tags.push_back({ RS2_STREAM_COLOR, -1, width, height, RS2_FORMAT_RGB8, fps, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             tags.push_back({ RS2_STREAM_DEPTH, -1, width, height, RS2_FORMAT_Z16, fps, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
@@ -892,16 +897,16 @@ namespace librealsense
             std::vector<tagged_profile> tags;
             tags.push_back({RS2_STREAM_GYRO, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_200, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             tags.push_back({RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_63, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
+            tags.push_back({RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_100, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
 
             return tags;
         };
     };
 
-    class rs405_device  :      public ds5_active,
-                               public ds5_color,
-                               public ds5_motion,
-                               public ds5_advanced_mode_base,
-                               public firmware_logger_device
+    class rs405_device  : public ds5_color,
+                          public ds5_nonmonochrome,
+                          public ds5_advanced_mode_base,
+                          public firmware_logger_device
     {
     public:
         rs405_device(std::shared_ptr<context> ctx,
@@ -909,9 +914,8 @@ namespace librealsense
                     bool register_device_notifications)
             : device(ctx, group, register_device_notifications),
               ds5_device(ctx, group),
-              ds5_active(ctx, group),
-              ds5_color(ctx,  group),
-              ds5_motion(ctx, group),
+              ds5_color(ctx, group),
+              ds5_nonmonochrome(ctx, group),
               ds5_advanced_mode_base(ds5_device::_hw_monitor, get_depth_sensor()),
               firmware_logger_device(ctx, group, ds5_device::_hw_monitor,
                 get_firmware_logs_command(),
@@ -925,17 +929,15 @@ namespace librealsense
             auto usb_spec = get_usb_spec();
             bool usb3mode = (usb_spec >= platform::usb3_type || usb_spec == platform::usb_undefined);
 
-            uint32_t depth_width  = usb3mode ?      848 : 640;
-            uint32_t depth_height = usb3mode ?      480 : 480;
-            uint32_t color_width = usb3mode ?       1280 : 640;
-            uint32_t color_height = usb3mode ?      720 : 480;
-            uint32_t fps    = usb3mode ?            30 :  15;
+            int depth_width  = usb3mode ?      848 : 640;
+            int depth_height = usb3mode ?      480 : 480;
+            int color_width = usb3mode ?       848 : 640;
+            int color_height = usb3mode ?      480 : 480;
+            int fps    = usb3mode ?            30 :  15;
 
             tags.push_back({ RS2_STREAM_COLOR, -1, color_width, color_height, RS2_FORMAT_RGB8, fps, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             tags.push_back({ RS2_STREAM_DEPTH, -1, depth_width, depth_height, RS2_FORMAT_Z16, fps, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             tags.push_back({ RS2_STREAM_INFRARED, -1, depth_width, depth_height, RS2_FORMAT_Y8, fps, profile_tag::PROFILE_TAG_SUPERSET });
-            tags.push_back({RS2_STREAM_GYRO, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_200, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
-            tags.push_back({RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_63, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
 
             return tags;
         }
@@ -943,11 +945,13 @@ namespace librealsense
         bool compress_while_record() const override { return false; }
     };
 
-    class rs455_device  :      public ds5_active,
+    class rs455_device  :      public ds5_nonmonochrome,
+                               public ds5_active,
                                public ds5_color,
                                public ds5_motion,
                                public ds5_advanced_mode_base,
-                               public firmware_logger_device
+                               public firmware_logger_device,
+                               public ds5_thermal_tracking
     {
     public:
         rs455_device(std::shared_ptr<context> ctx,
@@ -955,13 +959,15 @@ namespace librealsense
                     bool register_device_notifications)
             : device(ctx, group, register_device_notifications),
               ds5_device(ctx, group),
+              ds5_nonmonochrome(ctx, group),
               ds5_active(ctx, group),
               ds5_color(ctx,  group),
               ds5_motion(ctx, group),
               ds5_advanced_mode_base(ds5_device::_hw_monitor, get_depth_sensor()),
               firmware_logger_device(ctx, group, ds5_device::_hw_monitor,
-                get_firmware_logs_command(),
-                get_flash_logs_command()) 
+                    get_firmware_logs_command(),
+                    get_flash_logs_command()),
+              ds5_thermal_tracking(ds5_device::_thermal_monitor)
         {}
 
         std::shared_ptr<matcher> create_matcher(const frame_holder& frame) const override;
@@ -972,22 +978,24 @@ namespace librealsense
             auto usb_spec = get_usb_spec();
             bool usb3mode = (usb_spec >= platform::usb3_type || usb_spec == platform::usb_undefined);
 
-            uint32_t depth_width  = usb3mode ?      848 : 640;
-            uint32_t depth_height = usb3mode ?      480 : 480;
-            uint32_t color_width = usb3mode ?       1280 : 640;
-            uint32_t color_height = usb3mode ?      720 : 480;
-            uint32_t fps    = usb3mode ?            30 :  15;
+            int depth_width  = usb3mode ?    848 : 640;
+            int depth_height = usb3mode ?    480 : 480;
+            int color_width  = usb3mode ?   1280 : 640;
+            int color_height = usb3mode ?    720 : 480;
+            int fps          = usb3mode ?     30 :  15;
 
             tags.push_back({ RS2_STREAM_COLOR, -1, color_width, color_height, RS2_FORMAT_RGB8, fps, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             tags.push_back({ RS2_STREAM_DEPTH, -1, depth_width, depth_height, RS2_FORMAT_Z16, fps, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             tags.push_back({ RS2_STREAM_INFRARED, -1, depth_width, depth_height, RS2_FORMAT_Y8, fps, profile_tag::PROFILE_TAG_SUPERSET });
             tags.push_back({RS2_STREAM_GYRO, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_200, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
             tags.push_back({RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_63, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
+            tags.push_back({RS2_STREAM_ACCEL, -1, 0, 0, RS2_FORMAT_MOTION_XYZ32F, (int)odr::IMU_FPS_100, profile_tag::PROFILE_TAG_SUPERSET | profile_tag::PROFILE_TAG_DEFAULT });
 
             return tags;
         }
 
         bool compress_while_record() const override { return false; }
+
     };
 
     std::shared_ptr<device_interface> ds5_info::create(std::shared_ptr<context> ctx,
@@ -1077,7 +1085,7 @@ namespace librealsense
                 all_sensors_present = all_sensors_present && mi_present(devices, 3);
             }
 
-
+#if !defined(USE_RS2_HID)
 #if !defined(__APPLE__) // Not supported by macos
             auto is_pid_of_hid_sensor_device = [](int pid) { return std::find(std::begin(ds::hid_sensors_pid), std::end(ds::hid_sensors_pid), pid) != std::end(ds::hid_sensors_pid); };
             bool is_device_hid_sensor = false;
@@ -1093,6 +1101,7 @@ namespace librealsense
             {
                 all_sensors_present &= (hids.size() >= 2);
             }
+#endif
 #endif
 
             if (!devices.empty() && all_sensors_present)
@@ -1261,8 +1270,6 @@ namespace librealsense
     std::shared_ptr<matcher> rs405_device::create_matcher(const frame_holder& frame) const
     {
         std::vector<stream_interface*> streams = { _depth_stream.get() , _left_ir_stream.get() , _right_ir_stream.get(), _color_stream.get() };
-        std::vector<stream_interface*> mm_streams = { _accel_stream.get(), _gyro_stream.get()};
-        streams.insert(streams.end(), mm_streams.begin(), mm_streams.end());
         return matcher_factory::create(RS2_MATCHER_DEFAULT, streams);
     }
 

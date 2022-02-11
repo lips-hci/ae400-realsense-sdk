@@ -42,6 +42,7 @@ struct IpDeviceControlData
 
 const std::string STEREO_SENSOR_NAME("Stereo Module");
 const std::string RGB_SENSOR_NAME("RGB Camera");
+const std::string L500_SENSOR_NAME("L500 Depth Sensor");
 const std::string RS_MEDIA_TYPE("RS_VIDEO");
 const std::string RS_PAYLOAD_FORMAT("RS_FORMAT");
 const int MAX_WIDTH = 1280;
@@ -51,5 +52,7 @@ const int MAX_FRAME_SIZE = MAX_WIDTH * MAX_HEIGHT * MAX_BPP;
 const int MAX_MESSAGE_SIZE = MAX_FRAME_SIZE + sizeof(RsFrameHeader);
 const unsigned int SDP_MAX_LINE_LENGHT = 4000;
 const unsigned int RTP_TIMESTAMP_FREQ = 90000;
+
+int getStreamProfileBpp(rs2_format t_format);
 
 #pragma pack(pop)

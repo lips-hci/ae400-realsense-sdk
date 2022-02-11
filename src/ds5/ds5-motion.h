@@ -20,6 +20,7 @@ namespace librealsense
     using odr = IMU_OUTPUT_DATA_RATES;
 
 #ifdef _WIN32
+#if !defined(USE_RS2_HID)
     static const std::string gyro_sensor_name = "HID Sensor Class Device: Gyroscope";
     static const std::string accel_sensor_name = "HID Sensor Class Device: Accelerometer";
     static const std::map<odr, uint16_t> hid_fps_translation =
@@ -29,7 +30,7 @@ namespace librealsense
         {odr::IMU_FPS_200,  500},
         {odr::IMU_FPS_250,  400},
         {odr::IMU_FPS_400,  250} };
-
+#endif
 #else
     static const std::string gyro_sensor_name = "gyro_3d";
     static const std::string accel_sensor_name = "accel_3d";
@@ -153,13 +154,6 @@ namespace librealsense
             {
                 // D455 specific - Bosch BMI055
                 _def_extr = { { 1, 0, 0, 0, 1, 0, 0, 0, 1 },{ -0.03022f, 0.0074f, 0.01602f } };
-                _imu_2_depth_rot = { { -1,0,0 },{ 0,1,0 },{ 0,0,-1 } };
-            }
-            else if (_pid == ds::RS405_PID)
-            {
-                // D405 specific - Bosch BMI055
-                // TODO - verify with mechanical drawing
-                _def_extr = { { 1, 0, 0, 0, 1, 0, 0, 0, 1 },{ -0.00552f, 0.0051f, 0.01174f } };
                 _imu_2_depth_rot = { { -1,0,0 },{ 0,1,0 },{ 0,0,-1 } };
             }
             else if (_pid == ds::RS465_PID)

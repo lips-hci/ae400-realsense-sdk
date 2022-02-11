@@ -1,6 +1,8 @@
 // License: Apache 2.0. See LICENSE file in root directory.
 // Copyright(c) 2016 Intel Corporation. All Rights Reserved.
 
+
+#include "ds5/ds5-thermal-monitor.h"
 #include "ds5-options.h"
 
 namespace librealsense
@@ -38,7 +40,7 @@ namespace librealsense
     float asic_and_projector_temperature_options::query() const
     {
         if (!is_enabled())
-            throw wrong_api_call_sequence_exception("query option is allow only in streaming!");
+            throw wrong_api_call_sequence_exception("query is available during streaming only");
 
         #pragma pack(push, 1)
         struct temperature
@@ -118,7 +120,7 @@ namespace librealsense
     float motion_module_temperature_option::query() const
     {
         if (!is_enabled())
-            throw wrong_api_call_sequence_exception("query option is allow only in streaming!");
+            throw wrong_api_call_sequence_exception("query is available during streaming only");
 
         static const auto report_field = platform::custom_sensor_report_field::value;
         auto data = _ep.get_custom_report_data(custom_sensor_name, report_name, report_field);
@@ -132,7 +134,7 @@ namespace librealsense
     option_range motion_module_temperature_option::get_range() const
     {
         if (!is_enabled())
-            throw wrong_api_call_sequence_exception("get option range is allow only in streaming!");
+            throw wrong_api_call_sequence_exception("get option range is available during streaming only");
 
         static const auto min_report_field = platform::custom_sensor_report_field::minimum;
         static const auto max_report_field = platform::custom_sensor_report_field::maximum;
@@ -378,7 +380,7 @@ namespace librealsense
         {
             return option_range{ ds::inter_cam_sync_mode::INTERCAM_SYNC_DEFAULT,
                                  2,
-                                 1, 
+                                 1,
                                  ds::inter_cam_sync_mode::INTERCAM_SYNC_DEFAULT};
         };
     }
@@ -491,8 +493,8 @@ namespace librealsense
         return *_range;
     }
 
-    alternating_emitter_option::alternating_emitter_option(hw_monitor& hwm, sensor_base* ep)
-        : _hwm(hwm), _sensor(ep)
+    alternating_emitter_option::alternating_emitter_option(hw_monitor& hwm, sensor_base* ep, bool is_fw_version_using_id)
+        : _hwm(hwm), _sensor(ep), _is_fw_version_using_id(is_fw_version_using_id)
     {
         _range = [this]()
         {
@@ -503,8 +505,14 @@ namespace librealsense
     void alternating_emitter_option::set(float value)
     {
         std::vector<uint8_t> pattern{};
+
         if (static_cast<int>(value))
-            pattern = ds::alternating_emitter_pattern;
+        {
+            if (_is_fw_version_using_id)
+                pattern = ds::alternating_emitter_pattern;
+            else
+                pattern = ds::alternating_emitter_pattern_with_name;
+        }
 
         command cmd(ds::SETSUBPRESET, static_cast<int>(pattern.size()));
         cmd.data = pattern;
@@ -514,13 +522,34 @@ namespace librealsense
 
     float alternating_emitter_option::query() const
     {
-        command cmd(ds::GETSUBPRESETNAME);
-        auto res = _hwm.send(cmd);
-        if (res.size()>20)
-            throw invalid_value_exception("HWMON::GETSUBPRESETNAME invalid size");
+        if (_is_fw_version_using_id)
+        {
+            float rv = 0.f;
+            command cmd(ds::GETSUBPRESETID);
+            // if no subpreset is streaming, the firmware returns "ON_DATA_TO_RETURN" error
+            try {
+                auto res = _hwm.send(cmd);
+                // if a subpreset is streaming, checking this is the alternating emitter sub preset
+                if (res.size())
+                    rv = (res[0] == ds::ALTERNATING_EMITTER_SUBPRESET_ID) ? 1.0f : 0.f;
+            }
+            catch (...)
+            {
+                rv = 0.f;
+            }
 
-        static std::vector<uint8_t> alt_emitter_name(ds::alternating_emitter_pattern.begin()+2,ds::alternating_emitter_pattern.begin()+22);
-        return (alt_emitter_name == res);
+            return rv;
+        }
+        else
+        {
+            command cmd(ds::GETSUBPRESETID);
+            auto res = _hwm.send(cmd);
+            if (res.size() > 20)
+                throw invalid_value_exception("HWMON::GETSUBPRESETID invalid size");
+
+            static std::vector<uint8_t> alt_emitter_name(ds::alternating_emitter_pattern_with_name.begin() + 2, ds::alternating_emitter_pattern_with_name.begin() + 22);
+            return (alt_emitter_name == res);
+        }
     }
 
     emitter_always_on_option::emitter_always_on_option(hw_monitor& hwm, sensor_base* ep)
@@ -556,5 +585,200 @@ namespace librealsense
     option_range emitter_always_on_option::get_range() const
     {
         return *_range;
+    }
+
+
+    void hdr_option::set(float value)
+    {
+        _hdr_cfg->set(_option, value, _range);
+        _record_action(*this);
+    }
+
+    float hdr_option::query() const
+    {
+        return _hdr_cfg->get(_option);
+    }
+
+    option_range hdr_option::get_range() const
+    {
+        return _range;
+    }
+
+    const char* hdr_option::get_value_description(float val) const
+    {
+        if (_description_per_value.find(val) != _description_per_value.end())
+            return _description_per_value.at(val).c_str();
+        return nullptr;
+    }
+
+
+    void hdr_conditional_option::set(float value)
+    {
+        if (_hdr_cfg->is_config_in_process())
+            _hdr_option->set(value);
+        else
+        {
+            if (_hdr_cfg->is_enabled())
+                LOG_WARNING("The control - " << _uvc_option->get_description()
+                     << " - is locked while HDR mode is active.\n"); 
+            else
+                _uvc_option->set(value);
+        }
+    }
+
+    float hdr_conditional_option::query() const
+    {
+        if (_hdr_cfg->is_config_in_process())
+            return _hdr_option->query();
+        else
+            return _uvc_option->query();
+    }
+
+    option_range hdr_conditional_option::get_range() const
+    {
+        if (_hdr_cfg->is_config_in_process())
+            return _hdr_option->get_range();
+        else
+            return _uvc_option->get_range();
+    }
+
+    const char* hdr_conditional_option::get_description() const
+    {
+        if (_hdr_cfg->is_config_in_process())
+            return _hdr_option->get_description();
+        else
+            return _uvc_option->get_description();
+    }
+
+    bool hdr_conditional_option::is_enabled() const
+    {
+        if (_hdr_cfg->is_config_in_process())
+            return _hdr_option->is_enabled();
+        else
+            return _uvc_option->is_enabled();
+    }
+
+    auto_exposure_limit_option::auto_exposure_limit_option(hw_monitor& hwm, sensor_base* ep)
+        : _hwm(hwm), _sensor(ep)
+    {
+        _range = [this]()
+        {
+            return option_range{ 0, 165000, 1, 0 };
+        };
+    }
+
+    void auto_exposure_limit_option::set(float value)
+    {
+        command cmd_get(ds::AUTO_CALIB);
+        cmd_get.param1 = 5;
+        std::vector<uint8_t> ret = _hwm.send(cmd_get);
+        if (ret.empty())
+            throw invalid_value_exception("auto_exposure_limit_option::query result is empty!");
+
+        command cmd(ds::AUTO_CALIB);
+        cmd.param1 = 4;
+        cmd.param2 = static_cast<int>(value);
+        cmd.param3 = *(reinterpret_cast<uint32_t*>(ret.data() + 4));
+        _hwm.send(cmd);
+        _record_action(*this);
+    }
+
+    float auto_exposure_limit_option::query() const
+    {
+        command cmd(ds::AUTO_CALIB);
+        cmd.param1 = 5;
+
+        auto res = _hwm.send(cmd);
+        if (res.empty())
+            throw invalid_value_exception("auto_exposure_limit_option::query result is empty!");
+
+        return static_cast<float>(*(reinterpret_cast<uint32_t*>(res.data())));
+    }
+
+    option_range auto_exposure_limit_option::get_range() const
+    {
+        return *_range;
+    }
+
+    auto_gain_limit_option::auto_gain_limit_option(hw_monitor& hwm, sensor_base* ep)
+        : _hwm(hwm), _sensor(ep)
+    {
+        _range = [this]()
+        {
+            return option_range{ 0, 248, 1, 0 };
+        };
+    }
+
+    void auto_gain_limit_option::set(float value)
+    {
+        command cmd_get(ds::AUTO_CALIB);
+        cmd_get.param1 = 5;
+        std::vector<uint8_t> ret = _hwm.send(cmd_get);
+        if (ret.empty())
+            throw invalid_value_exception("auto_exposure_limit_option::query result is empty!");
+
+        command cmd(ds::AUTO_CALIB);
+        cmd.param1 = 4;
+        cmd.param2 = *(reinterpret_cast<uint32_t*>(ret.data()));
+        cmd.param3 = static_cast<int>(value);
+        _hwm.send(cmd);
+        _record_action(*this);
+    }
+
+    float auto_gain_limit_option::query() const
+    {
+        command cmd(ds::AUTO_CALIB);
+        cmd.param1 = 5;
+
+        auto res = _hwm.send(cmd);
+        if (res.empty())
+            throw invalid_value_exception("auto_exposure_limit_option::query result is empty!");
+
+        return static_cast<float>(*(reinterpret_cast<uint32_t*>(res.data() + 4)));
+    }
+
+    option_range auto_gain_limit_option::get_range() const
+    {
+        return *_range;
+    }
+
+    librealsense::thermal_compensation::thermal_compensation(
+        std::shared_ptr<ds5_thermal_monitor> monitor,
+        std::shared_ptr<option> toggle) :
+        _thermal_monitor(monitor),
+        _thermal_toggle(toggle)
+    {
+    }
+
+    float librealsense::thermal_compensation::query(void) const
+    {
+        auto val = _thermal_toggle->query();
+        return val;
+    }
+
+    void librealsense::thermal_compensation::set(float value)
+    {
+        if (value < 0)
+            throw invalid_value_exception("Invalid input for thermal compensation toggle: " + std::to_string(value));
+
+        _thermal_toggle->set(value);
+        _recording_function(*this);
+    }
+
+    const char* librealsense::thermal_compensation::get_description() const
+    {
+        return "Toggle thermal compensation adjustments mechanism";
+    }
+
+    const char* librealsense::thermal_compensation::get_value_description(float value) const
+    {
+        if (value == 0)
+        {
+            return "Thermal compensation is disabled";
+        }
+        else
+        {
+            return "Thermal compensation is enabled";
+        }
     }
 }

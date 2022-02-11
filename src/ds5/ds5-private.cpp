@@ -109,7 +109,7 @@ namespace librealsense
                     intrinsics.ppx = rect_params[2] * width / resolutions_list[resolution].x;
                     intrinsics.ppy = rect_params[3] * height / resolutions_list[resolution].y;
                 }
-                
+
                 intrinsics.model = RS2_DISTORTION_BROWN_CONRADY;
                 memset(intrinsics.coeffs, 0, sizeof(intrinsics.coeffs));  // All coefficients are zeroed since rectified depth is defined as CS origin
 
@@ -179,6 +179,15 @@ namespace librealsense
             };
             librealsense::copy(calc_intrinsic.coeffs, table->distortion, sizeof(table->distortion));
             LOG_DEBUG(endl << array2str((float_4&)(calc_intrinsic.fx, calc_intrinsic.fy, calc_intrinsic.ppx, calc_intrinsic.ppy)) << endl);
+
+            static rs2_intrinsics ref{};
+            if (memcmp(&calc_intrinsic, &ref, sizeof(rs2_intrinsics)))
+            {
+                LOG_DEBUG_THERMAL_LOOP("RGB Intrinsic: ScaleX, ScaleY = "
+                    << std::setprecision(3) << intrin(0, 0) << ", " << intrin(1, 1)
+                    << ". Fx,Fy = " << calc_intrinsic.fx << "," << calc_intrinsic.fy);
+                ref = calc_intrinsic;
+            }
 
             return calc_intrinsic;
         }
@@ -279,13 +288,13 @@ namespace librealsense
                     case RS400_IMU_PID:
                         found = (result.mi == 3);
                         break;
+                    case RS405_PID:
                     case RS430I_PID:
                         found = (result.mi == 4);
                         break;
                     case RS430_MM_PID:
                     case RS420_MM_PID:
                     case RS435I_PID:
-                    case RS405_PID:
                     case RS455_PID:
                         found = (result.mi == 6);
                         break;
@@ -342,9 +351,9 @@ namespace librealsense
             case 102: return { 3, { 9, 10, 16, 40, 29, 18, 19, 30, 20, 21, 54 } };
             case 103: return { 4, { 9, 10, 16, 40, 29, 18, 19, 30, 20, 21, 54 } };
             case 104: return { 4, { 9, 10, 40, 29, 18, 19, 30, 20, 21, 54 } };
-            case 105: // fall through
-            case 106:
-                return { 5, { 9, 10, 40, 29, 18, 19, 30, 20, 21, 54 } };
+            case 105: return { 5, { 9, 10, 40, 29, 18, 19, 30, 20, 21, 54 } };
+            case 106: return { 5, { 15, 9, 10, 16, 40, 29, 18, 19, 30, 20, 21, 54 } };
+            case 107: return { 6, { 15, 9, 10, 16, 40, 29, 18, 19, 30, 20, 21, 54 } };
             default:
                 throw std::runtime_error("Unsupported flash version: " + std::to_string(flash_version));
             }

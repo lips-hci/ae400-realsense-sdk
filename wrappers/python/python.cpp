@@ -27,6 +27,7 @@ PYBIND11_MODULE(NAME, m) {
     init_internal(m); // must be run after init_frame()
     init_export(m);
     init_advanced_mode(m);
+    init_serializable_device(m);
     init_util(m);
     
     /** rs_export.hpp **/
@@ -40,9 +41,11 @@ PYBIND11_MODULE(NAME, m) {
 
     m.def("log_to_console", &rs2::log_to_console, "min_severity"_a);
     m.def("log_to_file", &rs2::log_to_file, "min_severity"_a, "file_path"_a);
+    m.def("reset_logger", &rs2::reset_logger);
+    m.def("enable_rolling_log_file", &rs2::enable_rolling_log_file, "max_size"_a);
 
-	// Access to log_message is only from a callback (see log_to_callback below) and so already
-	// should have the GIL acquired
+    // Access to log_message is only from a callback (see log_to_callback below) and so already
+    // should have the GIL acquired
     py::class_<rs2::log_message> log_message(m, "log_message");
     log_message.def("line_number", &rs2::log_message::line_number)
         .def("filename", &rs2::log_message::filename)

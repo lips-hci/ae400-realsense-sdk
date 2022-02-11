@@ -15,10 +15,10 @@ elseif(COMPILER_SUPPORTS_CXX0X)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 endif()
 
-add_executable(lips-imu-reader lips_imu_reader.cpp)
-target_link_libraries(lips-imu-reader ${DEPENDENCIES})
-set_target_properties (lips-imu-reader PROPERTIES
+add_executable(lips-ae400-imu-reader lips_imu_reader.cpp)
+target_link_libraries(lips-ae400-imu-reader ${DEPENDENCIES})
+set_target_properties (lips-ae400-imu-reader PROPERTIES
 FOLDER "Examples"
 )
 
-install(TARGETS lips-imu-reader RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS lips-ae400-imu-reader RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

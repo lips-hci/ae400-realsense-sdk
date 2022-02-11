@@ -42,27 +42,30 @@ SCRIPT_DIR=$(realpath "$CUR_PWD/$(dirname $0)")
 AE4_GIT=$(dirname $SCRIPT_DIR)
 #cd "$CUR_PWD/$1" && RS2_GIT=$(pwd)
 #RS2_GIT=$(CUR_PWD)/$1
-RS2_GIT=$(realpath "$CUR_PWD/$1")
 
 # AE400 SDK path check
 if [ ! -e $AE4_GIT/scripts/patch-realsense-to-lips-ae400-sdk.sh ]; then
 echo ""
-echo "please switch to AE400 SDK directory and run patch script again."
+echo "Please switch to AE400 SDK directory and run patch script again."
 echo ""
 exit
 fi
 
 # RS source path check
-if [ ! -e $RS2_GIT/src/linux ]; then
-echo ""
-echo "first argument should be valid RealSense SDK directory, please check it."
-echo ""
-exit
+RS2_GIT=$(realpath "$1")
+if [ ! -e $RS2_GIT/include/librealsense2 ]; then
+  RS2_GIT=$(realpath "$CUR_PWD/$1")
+  if [ ! -e $(realpath "$CUR_PWD/$1")/include/librealsense2 ]; then
+    echo ""
+    echo "Please input valid RealSense SDK directory in 1st argument."
+    echo ""
+    exit
+  fi
 fi
 
 echo ""
-echo "AE400 SRC GIT = $AE4_GIT"
-echo "  RS2 SRC GIT = $RS2_GIT"
+echo "AE400 SRC Git = $AE4_GIT"
+echo "  RS2 SRC Git = $RS2_GIT"
 echo ""
 
 if [ "$(which rsync 2> /dev/null)" != "" ]; then
@@ -91,7 +94,7 @@ printf "\nadd_subdirectory(ae400-toolkit)\n" >> $RS2_GIT/tools/CMakeLists.txt
 
 getdevicetimems=$(grep -i '_device->get_device_time_ms()' "$RS2_GIT/src/global_timestamp_reader.cpp")
 if [ "$getdevicetimems" != "" ]; then
-echo "Patch src/global_timestamp_reader.cpp with new hardware time ms representation"
+printf "\nPatch src/global_timestamp_reader.cpp with new hardware time ms representation"
 newhwtimems="duration<double, std::milli>(system_clock::now().time_since_epoch()).count()"
 sed -i -e "s/_device->get_device_time_ms()/$newhwtimems/g" $RS2_GIT/src/global_timestamp_reader.cpp
 fi
@@ -161,7 +164,7 @@ printf "\nadd_subdirectory(ae400-toolkit)\n" >> $RS2_GIT/tools/CMakeLists.txt
 
 getdevicetimems=$(grep -i '_device->get_device_time_ms()' "$RS2_GIT/src/global_timestamp_reader.cpp")
 if [ "$getdevicetimems" != "" ]; then
-echo "Patch src/global_timestamp_reader.cpp with new hardware time ms representation"
+printf "\nPatch src/global_timestamp_reader.cpp with new hardware time ms representation"
 newhwtimems="duration<double, std::milli>(system_clock::now().time_since_epoch()).count()"
 sed -i -e "s/_device->get_device_time_ms()/$newhwtimems/g" $RS2_GIT/src/global_timestamp_reader.cpp
 fi

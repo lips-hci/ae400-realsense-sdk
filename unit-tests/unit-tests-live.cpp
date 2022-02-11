@@ -18,7 +18,7 @@
 
 using namespace rs2;
 
-TEST_CASE("Sync sanity", "[live][!mayfail]") {
+TEST_CASE("Sync sanity", "[live][mayfail]") {
 
     rs2::context ctx;
     if (make_context(SECTION_FROM_TEST_NAME, &ctx))
@@ -113,7 +113,7 @@ TEST_CASE("Sync sanity", "[live][!mayfail]") {
     }
 }
 
-TEST_CASE("Sync different fps", "[live][!mayfail]") {
+TEST_CASE("Sync different fps", "[live][mayfail]") {
 
     rs2::context ctx;
 
@@ -252,7 +252,7 @@ bool get_mode(rs2::device& dev, stream_profile* profile, int mode_index = 0)
     return false;
 }
 
-TEST_CASE("Sync start stop", "[live][!mayfail]") {
+TEST_CASE("Sync start stop", "[live][mayfail]") {
     rs2::context ctx;
 
     if (make_context(SECTION_FROM_TEST_NAME, &ctx))
@@ -692,53 +692,7 @@ TEST_CASE("Extrinsic transformations are transitive", "[live]")
     }
 }
 
-std::shared_ptr<device> do_with_waiting_for_camera_connection(rs2::context ctx, std::shared_ptr<device> dev, std::string serial, std::function<void()> operation)
-{
-    std::mutex m;
-    bool disconnected = false;
-    bool connected = false;
-    std::shared_ptr<device> result;
-    std::condition_variable cv;
-
-    ctx.set_devices_changed_callback([&result, dev, &disconnected, &connected, &m, &cv, &serial](rs2::event_information info) mutable
-    {
-        if (info.was_removed(*dev))
-        {
-            std::unique_lock<std::mutex> lock(m);
-            disconnected = true;
-            cv.notify_all();
-        }
-        auto list = info.get_new_devices();
-        if (list.size() > 0)
-        {
-            for (auto cam : list)
-            {
-                if (serial == cam.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER))
-                {
-                    std::unique_lock<std::mutex> lock(m);
-                    connected = true;
-                    result = std::make_shared<device>(cam);
-
-                    disable_sensitive_options_for(*result);
-                    cv.notify_all();
-                    break;
-                }
-            }
-        }
-    });
-
-    operation();
-
-    std::unique_lock<std::mutex> lock(m);
-    REQUIRE(wait_for_reset([&]() {
-        return cv.wait_for(lock, std::chrono::seconds(20), [&]() { return disconnected; });
-    }, dev));
-    REQUIRE(cv.wait_for(lock, std::chrono::seconds(20), [&]() { return connected; }));
-    REQUIRE(result);
-    return result;
-}
-
-TEST_CASE("Toggle Advanced Mode", "[live][AdvMd]") {
+TEST_CASE("Toggle Advanced Mode", "[live][AdvMd][mayfail]") {
     for (int i = 0; i < 3; ++i)
     {
         rs2::context ctx;
@@ -783,7 +737,7 @@ TEST_CASE("Toggle Advanced Mode", "[live][AdvMd]") {
 }
 
 
-TEST_CASE("Advanced Mode presets", "[live][AdvMd]")
+TEST_CASE("Advanced Mode presets", "[live][AdvMd][mayfail]")
 {
     static const std::vector<res_type> resolutions = { low_resolution,
                                                        medium_resolution,
@@ -873,7 +827,7 @@ TEST_CASE("Advanced Mode presets", "[live][AdvMd]")
     }
 }
 
-TEST_CASE("Advanced Mode JSON", "[live][AdvMd]") {
+TEST_CASE("Advanced Mode JSON", "[live][AdvMd][mayfail]") {
     rs2::context ctx;
     if (make_context(SECTION_FROM_TEST_NAME, &ctx))
     {
@@ -936,7 +890,7 @@ TEST_CASE("Advanced Mode JSON", "[live][AdvMd]") {
     }
 }
 
-TEST_CASE("Advanced Mode controls", "[live][AdvMd]") {
+TEST_CASE("Advanced Mode controls", "[live][AdvMd][mayfail]") {
     rs2::context ctx;
     if (make_context(SECTION_FROM_TEST_NAME, &ctx))
     {
@@ -1124,7 +1078,7 @@ TEST_CASE("Advanced Mode controls", "[live][AdvMd]") {
 }
 
 // the tests may incorrectly interpret changes to librealsense-core, namely default profiles selections
-TEST_CASE("Streaming modes sanity check", "[live][!mayfail]")
+TEST_CASE("Streaming modes sanity check", "[live][mayfail]")
 {
     // Require at least one device to be plugged in
     rs2::context ctx;
@@ -5608,11 +5562,10 @@ TEST_CASE("L500 zero order sanity", "[live]") {
 TEST_CASE("Positional_Sensors_API", "[live]")
 {
     rs2::context ctx;
-    auto dev_list = ctx.query_devices();
-    log_to_console(RS2_LOG_SEVERITY_WARN);
 
     if (make_context(SECTION_FROM_TEST_NAME, &ctx, "2.18.1"))
     {
+        log_to_console(RS2_LOG_SEVERITY_WARN);
         rs2::device dev;
         rs2::pipeline pipe(ctx);
         rs2::config cfg;
@@ -5744,11 +5697,10 @@ TEST_CASE("Positional_Sensors_API", "[live]")
 TEST_CASE("Wheel_Odometry_API", "[live]")
 {
     rs2::context ctx;
-    auto dev_list = ctx.query_devices();
-    log_to_console(RS2_LOG_SEVERITY_WARN);
 
     if (make_context(SECTION_FROM_TEST_NAME, &ctx, "2.18.1"))
     {
+        log_to_console(RS2_LOG_SEVERITY_WARN);
         rs2::device dev;
         rs2::pipeline pipe(ctx);
         rs2::config cfg;
@@ -5917,10 +5869,10 @@ TEST_CASE("l500_presets_set_preset", "[live]")
 
         std::map<int, int> expected_ambient_per_preset =
         {
-            {RS2_L500_VISUAL_PRESET_NO_AMBIENT, RS2_AMBIENT_LIGHT_NO_AMBIENT},
-            {RS2_L500_VISUAL_PRESET_LOW_AMBIENT, RS2_AMBIENT_LIGHT_LOW_AMBIENT},
-            {RS2_L500_VISUAL_PRESET_MAX_RANGE, RS2_AMBIENT_LIGHT_NO_AMBIENT},
-            {RS2_L500_VISUAL_PRESET_SHORT_RANGE, RS2_AMBIENT_LIGHT_LOW_AMBIENT}
+            {RS2_L500_VISUAL_PRESET_NO_AMBIENT, RS2_DIGITAL_GAIN_HIGH},
+            {RS2_L500_VISUAL_PRESET_LOW_AMBIENT, RS2_DIGITAL_GAIN_LOW},
+            {RS2_L500_VISUAL_PRESET_MAX_RANGE, RS2_DIGITAL_GAIN_HIGH},
+            {RS2_L500_VISUAL_PRESET_SHORT_RANGE, RS2_DIGITAL_GAIN_LOW}
         };
 
         std::map<int, int> expected_laser_power_per_preset =
@@ -5937,9 +5889,9 @@ TEST_CASE("l500_presets_set_preset", "[live]")
             {
                 ds.set_option(RS2_OPTION_SENSOR_MODE, (float)res);
                 ds.set_option(RS2_OPTION_VISUAL_PRESET, (float)i.first);
-                CAPTURE(ds.get_option(RS2_OPTION_AMBIENT_LIGHT));
-                REQUIRE(ds.get_option(RS2_OPTION_AMBIENT_LIGHT) == i.second);
-                apd_per_ambient[ds.get_option(RS2_OPTION_AMBIENT_LIGHT)] = ds.get_option(RS2_OPTION_AVALANCHE_PHOTO_DIODE);
+                CAPTURE(ds.get_option(RS2_OPTION_DIGITAL_GAIN));
+                REQUIRE(ds.get_option(RS2_OPTION_DIGITAL_GAIN) == i.second);
+                apd_per_ambient[ds.get_option(RS2_OPTION_DIGITAL_GAIN)] = ds.get_option(RS2_OPTION_AVALANCHE_PHOTO_DIODE);
                 auto expected_laser_power = expected_laser_power_per_preset.find(i.first);
                 if (expected_laser_power != expected_laser_power_per_preset.end())
                 {

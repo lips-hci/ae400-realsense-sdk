@@ -7,6 +7,9 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 set(DEPENDENCIES realsense2)
+if(BUILD_WITH_ZMQ)
+    set(DEPENDENCIES ${DEPENDENCIES} ${LIBZMQ_LIBRARIES})
+endif()
 
 find_package (Python3 COMPONENTS Interpreter Development)
 if (NOT ${BUILD_EASYLOGGINGPP})

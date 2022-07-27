@@ -19,7 +19,8 @@ namespace librealsense
 
     using odr = IMU_OUTPUT_DATA_RATES;
 
-#if defined(_WIN32) && defined(USE_RS2_HID)
+#ifdef _WIN32
+#if !defined(USE_RS2_HID)
     static const std::string gyro_sensor_name = "HID Sensor Class Device: Gyroscope";
     static const std::string accel_sensor_name = "HID Sensor Class Device: Accelerometer";
     static const std::map<odr, uint16_t> hid_fps_translation =
@@ -29,6 +30,7 @@ namespace librealsense
         {odr::IMU_FPS_200,  500},
         {odr::IMU_FPS_250,  400},
         {odr::IMU_FPS_400,  250} };
+#endif
 #else
     static const std::string gyro_sensor_name = "gyro_3d";
     static const std::string accel_sensor_name = "accel_3d";

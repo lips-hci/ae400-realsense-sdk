@@ -7,6 +7,10 @@ find_package(OpenCV REQUIRED)
 
 set(DEPENDENCIES realsense2 ${OpenCV_LIBS})
 
+if(BUILD_WITH_ZMQ)
+    set(DEPENDENCIES ${DEPENDENCIES} ${LIBZMQ_LIBRARIES})
+endif()
+
 add_subdirectory(imshow)
 add_subdirectory(grabcuts)
 add_subdirectory(latency-tool)

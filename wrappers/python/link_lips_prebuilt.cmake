@@ -26,7 +26,8 @@ endif()
 #    target_compile_definitions(pybackend2 PRIVATE WITH_TRACKING=1)
 #endif()
 
-target_compile_definitions(pybackend2 PRIVATE ENABLE_AE400_IMU)
+# KS2: DISABLE LIPS IMU
+#target_compile_definitions(pybackend2 PRIVATE ENABLE_AE400_IMU)
 
 if(DEFINED RAW_RS)
     list(REMOVE_ITEM RAW_RS ${REMOVE_RAW_RS})
@@ -43,4 +44,10 @@ if(TARGET pybackend2)
     set_target_properties(pybackend2 PROPERTIES
         SOURCES "${PYBIND_SRC}"
     )
+endif()
+
+if(BUILD_WITH_ZMQ)
+    add_dependencies(pybackend2 libzmq)
+    target_link_libraries(pybackend2 PRIVATE ${LIBZMQ_LIBRARIES})
+    target_include_directories(pybackend2 PRIVATE ${LIBZMQ_LOCAL_INCLUDE_PATH})
 endif()

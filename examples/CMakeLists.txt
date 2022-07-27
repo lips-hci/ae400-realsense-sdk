@@ -21,6 +21,10 @@ else()
     endif()
 endif()
 
+if(BUILD_WITH_ZMQ)
+    set(DEPENDENCIES ${DEPENDENCIES} ${LIBZMQ_LIBRARIES})
+endif()
+
 add_subdirectory(hello-realsense)
 add_subdirectory(software-device)
 add_subdirectory(capture)

@@ -107,6 +107,7 @@ macro(global_target_config)
             ${BOOST_INCLUDE_PATH}
             ${LZ4_INCLUDE_PATH}
             ${LIBUSB_LOCAL_INCLUDE_PATH}
+            ${LIBZMQ_LOCAL_INCLUDE_PATH}
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>

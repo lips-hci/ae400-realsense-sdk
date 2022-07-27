@@ -1085,7 +1085,7 @@ namespace librealsense
                 all_sensors_present = all_sensors_present && mi_present(devices, 3);
             }
 
-#if defined(USE_RS2_HID)
+#if !defined(USE_RS2_HID)
 #if !defined(__APPLE__) // Not supported by macos
             auto is_pid_of_hid_sensor_device = [](int pid) { return std::find(std::begin(ds::hid_sensors_pid), std::end(ds::hid_sensors_pid), pid) != std::end(ds::hid_sensors_pid); };
             bool is_device_hid_sensor = false;

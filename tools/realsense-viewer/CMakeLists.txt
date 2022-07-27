@@ -211,7 +211,7 @@ include_directories(
 
 set_property(TARGET realsense-viewer PROPERTY CXX_STANDARD 11)
 
-set(RS_VIEWER_LIBS ${GTK3_LIBRARIES} Threads::Threads realsense2-gl)
+set(RS_VIEWER_LIBS ${GTK3_LIBRARIES} Threads::Threads)
 
 if (CHECK_FOR_UPDATES)
     message( STATUS "Check for updates capability added to realsense-viewer" )

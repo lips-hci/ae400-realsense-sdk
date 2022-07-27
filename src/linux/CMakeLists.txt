@@ -1,6 +1,6 @@
 # License: Apache 2.0. See LICENSE file in root directory.
 # Copyright(c) 2019 Intel Corporation. All Rights Reserved.
-# Copyright(c) 2020-2021 LIPS Corporation. All Rights Reserved.
+# Copyright(c) 2020-2022 LIPS Corporation. All Rights Reserved.
 # Export IMU get API to our librealsense
 target_sources(${LRS_TARGET}
     PRIVATE
@@ -28,13 +28,14 @@ else()
 endif()
 
 if(${REALSENSE_VERSION_STRING} VERSION_LESS 2.43)
-    message(FATAL_ERROR "AE400 SDK requires RealSense SDK codebase v2.43 or later version")
+    message(FATAL_ERROR "KS2 SDK requires RealSense SDK codebase v2.43 or later version")
 elseif(${REALSENSE_VERSION_STRING} VERSION_GREATER 2.48)
-    # for RS 2.49~50
-    set(LIBVERSION 1.0.2.5)
+    # for RS 2.49~50+
+    #set(LIBVERSION 1.1.0.5)
+    message(FATAL_ERROR "KS2 SDK requires RealSense SDK codebase NO greater than v2.48")
 else()
     # for RS 2.43~48
-    set(LIBVERSION 1.0.2.0)
+    set(LIBVERSION 1.1.0.0)
 endif()
 
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
@@ -78,11 +79,6 @@ if(USE_EXTERNAL_USB)
     add_dependencies(${LRS_TARGET} libusb)
 endif()
 
-if(${REALSENSE_VERSION_STRING} VERSION_LESS 2.34)
-message(STATUS "[LIPS PATCH] Disable global time by patching source timestamp_reader")
-# Manually patch src/global_timestamp_reader.cpp: get_device_time_ms() to redefine hardware time ms
-# get_device_time_ms() since v2.23
-else()
 message(STATUS "[LIPS PATCH] Disable global time by defining RASPBERRY_PI")
 # Refer this commit to DISABLE global time reading (ds5_device::get_device_time_ms)
 # depth streaming is easily stuck (when AE is on) due to device time reading on
@@ -93,4 +89,3 @@ message(STATUS "[LIPS PATCH] Disable global time by defining RASPBERRY_PI")
 #Date: Thu, 26 Mar 2020 03:52:54 -0700
 #Subject: [PATCH] Disable global time on RPi
 target_compile_definitions(${LRS_TARGET} PRIVATE RASPBERRY_PI)
-endif()

@@ -52,14 +52,14 @@ endif()
 # set library version
 set_target_properties(${LRS_TARGET} PROPERTIES VERSION ${REALSENSE_VERSION_STRING} SOVERSION "${REALSENSE_VERSION_MAJOR}.${REALSENSE_VERSION_MINOR}")
 
+# configure the project according to OS specific requirments
+# macro definition located at "CMake/<OS>_config.cmake"
+os_target_config()
+
 include(include/CMakeLists.txt)
 include(src/CMakeLists.txt)
 include(third-party/CMakeLists.txt)
 include(common/utilities/CMakeLists.txt)
-
-# configure the project according to OS specific requirments
-# macro definition located at "CMake/<OS>_config.cmake"
-os_target_config()
 
 # global project configuration
 # macro definition located at "CMake/global_config.cmake"

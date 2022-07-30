@@ -18,21 +18,26 @@ This software development kits(SDK) is fully compatible to [Intel® RealSense™
 
 | Branch    | LIPS SDK ver. | AE400 FW ver. | Min. RS SDK ver.| Support status  |
 | --------- | ------------- | ------------- | --------------- | --------------- |
-| master    | v1.0.0.5 :new:|               | v2.38.1         | v2.38 ~ present |
+| master    | v1.0.2.0 :new:| recommend v2.5| v2.43.0         | v2.43 ~ v.2.48  |
+| master    | v1.0.0.5      |               | v2.38.1         | v2.38 ~ present |
 | master    | v1.0.0.2      | v2.1          | v2.32.0         | v2.32 ~ present |
 | sdk-v0907 | v0.9.0.7      | v1.4          | v2.17.1         | v2.17 ~ v2.21 ([learn more](doc/support_list_ae400_realsense_sdk.md)) |
 
+Known issues:
+ - realsense-viewer may not work or no responding when running v1.0.2.0 with RS v2.49~2.50
+
 Download latest LIPS SDK and FW from https://www.lips-hci.com/lipssdk
 
-Known issues:
- - realsense-viewer is hung or not responding when running v1.0.0.5 with RS v2.45.0~2.49.0
-
+LIPS SDK v1.0.2.0
+* Upgrade RS codebase to 2.43.0
 
 LIPS SDK v1.0.0.2
 
 * Since this version, SDK supports multicam, that means you can connect 2 or more AE400 cameras. However, more AE400 camera means more CPU computing ability and network adapters/bandwidth required on your host. Your Gigabit PoE switch also have to provide sufficient power to all the connected cameras.
  - [Release Note](https://filebox.lips-hci.com/index.php/s/twUlwqdzNFl7RAc?path=%2FUser%20Guide)
  - [FW Update Guide](https://filebox.lips-hci.com/index.php/s/twUlwqdzNFl7RAc?path=%2FUser%20Guide) (see Ch.8.5 for Firmware Update)
+
+NOTE: branch ks2.v43.0 is for camera KS2 ([learn more](doc/build_ks2.md))
 
 ## Build instruction
 You need CMake to build this SDK, please refer steps described on RealSense™ SDK document.

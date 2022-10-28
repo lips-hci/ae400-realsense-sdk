@@ -68,7 +68,8 @@ else()
         IMPORTED_LOCATION_DEBUG ${LIB_BACKEND_ETHERNET_DEBUG}
     )
     message(STATUS "[LIPS PATCH] Found backend-ethernet library: ${LIB_BACKEND_ETHERNET}")
-    target_link_libraries(${LRS_TARGET} PRIVATE backend-ethernet ${LIBZMQ_LIBRARIES})
+    target_link_libraries(${LRS_TARGET} PRIVATE backend-ethernet)
+
     mark_as_advanced(LIB_BACKEND_ETHERNET LIB_BACKEND_ETHERNET_DEBUG)
 endif()
 
@@ -82,3 +83,9 @@ message(STATUS "[LIPS PATCH] Disable global time by defining RASPBERRY_PI")
 #Date: Thu, 26 Mar 2020 03:52:54 -0700
 #Subject: [PATCH] Disable global time on RPi
 target_compile_definitions(${LRS_TARGET} PRIVATE RASPBERRY_PI)
+
+if(BUILD_WITH_ZMQ)
+    add_dependencies(${LRS_TARGET} libzmq)
+    target_include_directories(${LRS_TARGET} PRIVATE ${LIBZMQ_LOCAL_INCLUDE_PATH})
+    target_link_libraries(${LRS_TARGET} PRIVATE ${LIBZMQ_LIBRARIES})
+endif()

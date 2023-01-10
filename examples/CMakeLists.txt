@@ -49,3 +49,6 @@ add_subdirectory(pose-apriltag)
 add_subdirectory(tracking-and-depth)
 add_subdirectory(hdr)
 add_subdirectory(imu-reader)
+#LIPS modified samples to demo how to recover rs pipeline from network problem
+add_subdirectory(distance-safe)
+add_subdirectory(capture-safe)

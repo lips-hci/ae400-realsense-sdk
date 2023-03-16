@@ -34,7 +34,7 @@ elseif(${REALSENSE_VERSION_STRING} VERSION_GREATER 2.48)
     set(LIBVERSION 1.0.2.5)
 else()
     # for RS 2.43~48
-    set(LIBVERSION 1.0.3.0)
+    set(LIBVERSION 1.0.4.0)
 endif()
 
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
@@ -67,7 +67,7 @@ else()
         IMPORTED_LOCATION_DEBUG ${LIB_BACKEND_ETHERNET_DEBUG}
     )
     message(STATUS "[LIPS PATCH] Found backend-ethernet library: ${LIB_BACKEND_ETHERNET}")
-    target_link_libraries(${LRS_TARGET} PRIVATE backend-ethernet udev)
+    target_link_libraries(${LRS_TARGET} PRIVATE backend-ethernet udev curl)
     mark_as_advanced(LIB_BACKEND_ETHERNET LIB_BACKEND_ETHERNET_DEBUG)
 endif()
 

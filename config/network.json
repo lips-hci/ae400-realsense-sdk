@@ -3,5 +3,7 @@
     "config": {
         "ip1": "192.168.0.100",
         "ip2": "192.168.1.100"
-    }
+    },
+    "debug": "0",
+    "debug_help": "set to 1 to show socket connect error logs in console, default is 0 (socket error log disabled)"
 }

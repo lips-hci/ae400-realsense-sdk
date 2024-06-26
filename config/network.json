@@ -1,6 +1,8 @@
 {
     "count": "1",
     "config": {
+        "help": "you can specify IP address to env variable AE4_DEVICE_IP for single device connection at execution time",
+        "help_example": "env AE4_DEVICE_IP=192.168.0.100 <your executable>",
         "ip1": "192.168.0.100",
         "ip2": "192.168.1.100"
     },
